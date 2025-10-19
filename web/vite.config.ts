@@ -4,7 +4,7 @@ import XEUtils from 'xe-utils'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import { createHtmlPlugin } from 'vite-plugin-html'
-import externalGlobals from 'rollup-plugin-external-globals'
+import autoprefixer from 'autoprefixer'
 
 // https://vitejs.dev/config/
 export default ({ mode }: ConfigEnv): UserConfig => {
@@ -32,19 +32,15 @@ export default ({ mode }: ConfigEnv): UserConfig => {
     server: {
       port: 8084
     },
+    css: {
+      postcss: {
+        plugins: [autoprefixer()]
+      }
+    },
     build: {
       assetsDir: 'assets',
-      outDir: env.VITE_OUT_DIR || 'dist',
-      rollupOptions: {
-        // 不打包依赖
-        external: ['echarts'],
-        plugins: [
-          // 不打包依赖映射的对象
-          externalGlobals({
-            echarts: 'echarts'
-          })
-        ]
-      }
+      emptyOutDir: true,
+      outDir: env.VITE_OUT_DIR || 'dist'
     }
   }
 }

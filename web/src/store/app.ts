@@ -1,7 +1,9 @@
 import { defineStore } from 'pinia'
 import { VxeUI, VxeGlobalThemeName, VxeGlobalI18nLocale, VxeComponentSizeType } from 'vxe-pc-ui'
 import tinycolor2 from 'tinycolor2'
-import { postDnsService } from '@/api/dns'
+import { RouteLocationNormalizedLoadedGeneric } from 'vue-router'
+import { EnumsVO } from '@/api/user'
+import { getEnums } from '@/api/app'
 
 function updatePrimaryColor (color: string) {
   if (color) {
@@ -36,13 +38,13 @@ if (currPrimaryColor) {
 export const useAppStore = defineStore('app', {
   state: () => {
     return {
+      icon: 'dns',
       theme: currTheme,
-      serviceStatus: 'stop',
+      enums: {} as EnumsVO,
+      webTitle: window.WebTitle,
       primaryColor: currPrimaryColor,
       componentsSize: currComponentsSize,
-      language: currLanguage,
-      collapseAside: false,
-      pageKey: 0
+      language: currLanguage
     }
   },
   getters: {
@@ -57,15 +59,6 @@ export const useAppStore = defineStore('app', {
       VxeUI.setTheme(theme)
       localStorage.setItem('APP_THEME', theme || '')
     },
-    setServiceStatus (status: string, iface: string) {
-      postDnsService(status, iface).then(res => {
-        if (res.data.first === 'first') {
-          // @ts-ignore
-          window.isFirstLoading = 'third'
-        }
-        this.serviceStatus = res.data.running
-      })
-    },
     setPrimaryColor (color: string) {
       updatePrimaryColor(color)
       this.primaryColor = color
@@ -74,6 +67,10 @@ export const useAppStore = defineStore('app', {
     setComponentsSize (size: VxeComponentSizeType) {
       this.componentsSize = size
       localStorage.setItem('VXE_DOCS_COMPONENTS_SIZE', size || '')
+    },
+    async setEnums () {
+      const res = await getEnums()
+      this.enums = res.data as EnumsVO
     },
     /**
      * 设置语言
@@ -85,6 +82,16 @@ export const useAppStore = defineStore('app', {
         VxeUI.setLanguage(language)
         localStorage.setItem('APP_LANGUAGE', language)
       }
+    },
+    updatePageTitle (route: RouteLocationNormalizedLoadedGeneric) {
+      this.icon = (route.meta?.icon as string) || 'dns'
+      const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+      if (favicon) {
+        favicon.type = 'image/png'
+        favicon.href = `/assets/icon-${this.icon}.png`
+      }
+      this.webTitle = String(route.meta?.title || '')
+      document.title = [this.webTitle, window.WebTitle].join(' - ')
     }
   }
 })

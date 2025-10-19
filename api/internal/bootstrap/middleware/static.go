@@ -1,14 +1,15 @@
 package middleware
 
 import (
-	"github.com/gin-gonic/gin"
 	"io/fs"
-	"local_dns_proxy/internal/core"
-	"local_dns_proxy/pkg/constants"
-	"local_dns_proxy/pkg/enums/code"
-	"local_dns_proxy/public"
 	"net/http"
 	"strings"
+	"toolbox/internal/core"
+	"toolbox/pkg/constants"
+	"toolbox/pkg/enums/code"
+	"toolbox/public"
+
+	"github.com/gin-gonic/gin"
 )
 
 // FaviconMiddleware 加载 favicon.ico
@@ -32,7 +33,7 @@ func ResourceDirInterception(engine *core.Engine) {
 			c.Set(constants.HttpLogKey, "静态资源")
 		}
 		if strings.EqualFold(c.Request.URL.Path, "/assets/") {
-			c.JsonSafeDesc(code.RequestNotFound, nil)
+			c.JsonDesc(code.RequestNotFound, nil)
 			c.AbortWithStatus(404)
 		}
 	})
@@ -40,4 +41,5 @@ func ResourceDirInterception(engine *core.Engine) {
 	// 读取嵌入二进制的静态资源目录
 	staticFS, _ := fs.Sub(public.WebFS, "web/assets")
 	engine.Engine.StaticFS("/assets", http.FS(staticFS))
+	engine.Engine.Static("/uploads", constants.UploadPath)
 }

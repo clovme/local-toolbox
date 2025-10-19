@@ -1,8 +1,8 @@
 package status
 
 import (
-	"local_dns_proxy/pkg/enums"
 	"sort"
+	"toolbox/pkg/enums"
 )
 
 type Status int
@@ -30,28 +30,28 @@ func init() {
 }
 
 // Key 获取enums.Key
-func (c Status) Key() string {
-	return initiate[c].Key
+func (r Status) Key() string {
+	return initiate[r].Key
 }
 
 // Name 获取枚举名称
-func (c Status) Name() string {
-	return initiate[c].Name
+func (r Status) Name() string {
+	return initiate[r].Name
 }
 
 // Desc 获取枚举描述
-func (c Status) Desc() string {
-	return initiate[c].Desc
+func (r Status) Desc() string {
+	return initiate[r].Desc
 }
 
 // Int 获取枚举值
-func (c Status) Int() int {
-	return int(c)
+func (r Status) Int() int {
+	return int(r)
 }
 
 // Is 比较枚举值
-func (c Status) Is(v Status) bool {
-	return v == c
+func (r Status) Is(v Status) bool {
+	return v == r
 }
 
 // Code 获取Status
@@ -62,8 +62,8 @@ func Code(key string) Status {
 	return Disable
 }
 
-// Values 获取所有枚举
-func Values() []Status {
+// ValueList 获取所有枚举列表
+func ValueList() []Status {
 	values := make([]Status, 0, len(initiate))
 	for k := range initiate {
 		values = append(values, k)
@@ -72,4 +72,13 @@ func Values() []Status {
 		return values[i] < values[j]
 	})
 	return values
+}
+
+// ValueMap 获取所有枚举Map（安全副本）
+func ValueMap() map[Status]enums.Enums {
+	copyMap := make(map[Status]enums.Enums, len(initiate))
+	for k, v := range initiate {
+		copyMap[k] = v
+	}
+	return copyMap
 }

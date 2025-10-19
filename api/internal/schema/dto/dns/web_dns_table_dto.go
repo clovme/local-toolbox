@@ -1,7 +1,7 @@
 package dns
 
 import (
-	"local_dns_proxy/internal/models"
+	"toolbox/internal/models"
 )
 
 type WebDeleteRow struct {

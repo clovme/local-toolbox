@@ -1,16 +1,20 @@
 package web
 
 import (
-	"github.com/gin-gonic/gin"
-	dnsService "local_dns_proxy/internal/application/dns"
-	"local_dns_proxy/internal/core"
-	"local_dns_proxy/internal/schema/dto/dns"
-	"local_dns_proxy/pkg/cfg"
-	"local_dns_proxy/pkg/constants"
-	"local_dns_proxy/pkg/copyright"
-	"local_dns_proxy/pkg/enums/code"
-	"local_dns_proxy/pkg/utils"
 	"strings"
+	dnsService "toolbox/internal/application/dns"
+	"toolbox/internal/core"
+	"toolbox/internal/schema/dto/dns"
+	"toolbox/pkg/config"
+	"toolbox/pkg/constants"
+	"toolbox/pkg/copyright"
+	"toolbox/pkg/enums/code"
+	"toolbox/pkg/enums/icon"
+	"toolbox/pkg/enums/position"
+	"toolbox/pkg/enums/status"
+	"toolbox/pkg/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 type DnsHandler struct {
@@ -27,6 +31,21 @@ func (r *DnsHandler) GetViewsIndexHandler(c *core.Context) {
 	c.HTML("index.html", nil)
 }
 
+// GetEnumsHandler
+// @Type			api
+// @Group 			dnsApi
+// @Router			/enums [GET]
+// @Name			enumsMap
+// @Summary			获取枚举映射
+func (r *DnsHandler) GetEnumsHandler(c *core.Context) {
+	c.JsonSuccess(gin.H{
+		"code":     code.ValueMap(),
+		"status":   status.ValueMap(),
+		"icon":     icon.ValueMap(),
+		"position": position.ValueMap(),
+	})
+}
+
 // CopyrightHandler
 // @Type			api
 // @Group 			dnsApi
@@ -34,7 +53,7 @@ func (r *DnsHandler) GetViewsIndexHandler(c *core.Context) {
 // @Name			copyright
 // @Summary			版权
 func (r *DnsHandler) CopyrightHandler(c *core.Context) {
-	c.JsonUnSafeSuccess(copyright.NewCopyright())
+	c.JsonSuccess(copyright.NewCopyright())
 }
 
 // PageHandler
@@ -48,12 +67,12 @@ func (r *DnsHandler) PageHandler(c *core.Context) {
 	if !ok {
 		query = "createdAt|asc"
 	}
-	dataList, err := r.Service.FindDnsList(query)
+	dataList, err := r.Service.ServiceFindDnsList(query)
 	if err != nil {
-		c.JsonSafeDesc(code.Fail, err)
+		c.JsonFail(code.ServiceQueryError, "获取DNS列表失败", err)
 		return
 	}
-	c.JsonSafeSuccess(dataList)
+	c.JsonSuccess(dataList)
 }
 
 // SaveHandler
@@ -65,10 +84,10 @@ func (r *DnsHandler) PageHandler(c *core.Context) {
 func (r *DnsHandler) SaveHandler(c *core.Context) {
 	var data dns.WebSaveData
 	if err := c.ShouldBindJSON(&data); err != nil {
-		c.JsonSafeDesc(code.ServiceInsertError, err)
+		c.JsonFailDesc(code.ServiceInsertError, err)
 		return
 	}
-	c.JsonUnSafeSuccess(r.Service.SaveDnsData(data))
+	c.JsonSuccess(r.Service.ServiceSaveDnsData(data))
 }
 
 // DeleteHandler
@@ -80,81 +99,81 @@ func (r *DnsHandler) SaveHandler(c *core.Context) {
 func (r *DnsHandler) DeleteHandler(c *core.Context) {
 	var row dns.WebDeleteRow
 	if err := c.ShouldBindJSON(&row); err != nil {
-		c.JsonSafeDesc(code.ServiceDeleteError, err)
+		c.JsonFailDesc(code.ServiceDeleteError, err)
 		return
 	}
-	if err := r.Service.DeleteDnsData(row.ID); err != nil {
-		c.JsonSafeDesc(code.ServiceDeleteError, err)
+	if err := r.Service.ServiceDeleteDnsData(row.ID); err != nil {
+		c.JsonFailDesc(code.ServiceDeleteError, err)
 		return
 	}
-	c.JsonSafe(code.Success, "数据删除成功", nil)
+	c.JsonSuccess("数据删除成功")
 }
 
 // ServiceRunningHandler
 // @Type			api
 // @Group 			dnsApi
-// @Router			/service/running/{first}/{iface} [POST]
+// @Router			/service/running/{iface} [POST]
 // @Name			dnsServiceRunning
 // @Summary			启动DNS服务
 func (r *DnsHandler) ServiceRunningHandler(c *core.Context) {
-	if strings.EqualFold(c.Param("first"), "first") {
-		c.JsonSafeDnsStatus("first", cfg.C.Server.DNSRunning)
+	cfg := config.GetConfig()
+	if strings.EqualFold(cfg.Server.DNSRunning, constants.DNSRunning) {
+		c.JsonDnsStatus(constants.DNSRunning)
 		return
 	}
+	cfg.Server.Iface = c.Param("iface")
+	cfg.Server.DNSRunning = constants.DNSRunning
 
-	cfg.C.Server.Iface = c.Param("iface")
-	cfg.C.Server.DNSRunning = constants.DNSRunning
-
-	dnsProxy, err := r.Service.NewDNSProxy()
+	dnsProxy, err := r.Service.ServiceNewDNSProxy()
 	if err != nil {
-		c.JsonSafe(code.RequestNotFound, err.Error(), nil)
+		c.JsonFailDesc(code.RequestNotFound, err)
 		return
 	}
-	if err := dnsProxy.SetLocalDNS(cfg.C.Server.Iface); err != nil {
-		c.JsonSafe(code.RequestNotFound, "设置系统DNS(127.0.0.1)失败", err)
+	if err := dnsProxy.SetLocalDNS(cfg.Server.Iface); err != nil {
+		c.JsonFail(code.RequestNotFound, "设置系统DNS(127.0.0.1)失败", err)
 		return
 	}
 
 	go dnsProxy.StartDnsServer()
+	<-dnsProxy.CtxStatus.Done()
 
 	if !dnsProxy.IsRunning {
-		c.JsonSafeDnsStatus("third", constants.DNSStop)
+		c.JsonDnsStatus(constants.DNSStop)
 		return
 	}
 
-	<-dnsProxy.CtxStatus.Done()
-
-	c.JsonSafeDnsStatus("third", constants.DNSRunning)
-	cfg.SaveToIni()
+	c.JsonDnsStatus(constants.DNSRunning)
+	config.SaveToIni()
 }
 
 // ServiceStopHandler
 // @Type			api
 // @Group 			dnsApi
-// @Router			/service/stop/{first}/{iface} [POST]
+// @Router			/service/stop/{iface} [POST]
 // @Name			dnsServiceStop
 // @Summary			禁用DNS服务
 func (r *DnsHandler) ServiceStopHandler(c *core.Context) {
-	if strings.EqualFold(c.Param("first"), "first") {
-		c.JsonSafeDnsStatus("first", cfg.C.Server.DNSRunning)
+	cfg := config.GetConfig()
+
+	if strings.EqualFold(cfg.Server.DNSRunning, constants.DNSStop) {
+		c.JsonDnsStatus(constants.DNSStop)
 		return
 	}
+	cfg.Server.DNSRunning = constants.DNSStop
+	cfg.Server.Iface = c.Param("iface")
 
-	cfg.C.Server.DNSRunning = constants.DNSStop
-	cfg.C.Server.Iface = c.Param("iface")
-
-	dnsProxy, err := r.Service.NewDNSProxy()
+	dnsProxy, err := r.Service.ServiceNewDNSProxy()
 	if err != nil {
-		c.JsonSafe(code.RequestNotFound, "获取网卡列表失败", err)
+		c.JsonFail(code.RequestNotFound, "获取网卡列表失败", err)
 		return
 	}
-	if err := dnsProxy.RestoreDNS(cfg.C.Server.Iface); err != nil {
-		c.JsonSafe(code.RequestNotFound, "系统代理DNS设置失败", err)
+	if err := dnsProxy.RestoreDNS(cfg.Server.Iface); err != nil {
+		c.JsonFail(code.RequestNotFound, "系统代理DNS设置失败", err)
 		return
 	}
 
-	c.JsonSafeDnsStatus("third", constants.DNSStop)
-	cfg.SaveToIni()
+	c.JsonDnsStatus(constants.DNSStop)
+	config.SaveToIni()
 }
 
 // GetNetIfaceHandler
@@ -166,12 +185,13 @@ func (r *DnsHandler) ServiceStopHandler(c *core.Context) {
 func (r *DnsHandler) GetNetIfaceHandler(c *core.Context) {
 	ifaces, err := utils.GetNetworkInterfaces()
 	if err != nil {
-		c.JsonSafe(code.RequestNotFound, "获取网卡列表失败", err)
+		c.JsonFail(code.ServiceQueryError, "获取网卡列表失败", err)
 		return
 	}
-	c.JsonSafeSuccess(gin.H{
-		"iface":   cfg.C.Server.Iface,
-		"running": cfg.C.Server.DNSRunning,
+	cfg := config.GetConfig()
+	c.JsonSuccess(gin.H{
+		"iface":   cfg.Server.Iface,
+		"running": cfg.Server.DNSRunning,
 		"ifaces":  ifaces,
 	})
 }

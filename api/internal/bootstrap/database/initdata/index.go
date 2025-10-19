@@ -3,11 +3,13 @@ package initdata
 import (
 	"errors"
 	"gorm.io/gorm"
-	"local_dns_proxy/internal/infrastructure/query"
+	"toolbox/internal/core"
+	"toolbox/internal/infrastructure/query"
 )
 
 type InitData struct {
-	Q *query.Query
+	Router []core.RoutesInfo
+	Q      *query.Query
 }
 
 // insertIfNotExist 插入数据

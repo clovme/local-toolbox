@@ -16,34 +16,54 @@ import (
 )
 
 var (
-	Q        = new(Query)
-	DNSTable *dNSTable
+	Q          = new(Query)
+	Article    *article
+	Category   *category
+	DNSTable   *dNSTable
+	FileRecord *fileRecord
+	Home       *home
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
+	Article = &Q.Article
+	Category = &Q.Category
 	DNSTable = &Q.DNSTable
+	FileRecord = &Q.FileRecord
+	Home = &Q.Home
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:       db,
-		DNSTable: newDNSTable(db, opts...),
+		db:         db,
+		Article:    newArticle(db, opts...),
+		Category:   newCategory(db, opts...),
+		DNSTable:   newDNSTable(db, opts...),
+		FileRecord: newFileRecord(db, opts...),
+		Home:       newHome(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	DNSTable dNSTable
+	Article    article
+	Category   category
+	DNSTable   dNSTable
+	FileRecord fileRecord
+	Home       home
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:       db,
-		DNSTable: q.DNSTable.clone(db),
+		db:         db,
+		Article:    q.Article.clone(db),
+		Category:   q.Category.clone(db),
+		DNSTable:   q.DNSTable.clone(db),
+		FileRecord: q.FileRecord.clone(db),
+		Home:       q.Home.clone(db),
 	}
 }
 
@@ -57,18 +77,30 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:       db,
-		DNSTable: q.DNSTable.replaceDB(db),
+		db:         db,
+		Article:    q.Article.replaceDB(db),
+		Category:   q.Category.replaceDB(db),
+		DNSTable:   q.DNSTable.replaceDB(db),
+		FileRecord: q.FileRecord.replaceDB(db),
+		Home:       q.Home.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	DNSTable *dNSTableDo
+	Article    *articleDo
+	Category   *categoryDo
+	DNSTable   *dNSTableDo
+	FileRecord *fileRecordDo
+	Home       *homeDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		DNSTable: q.DNSTable.WithContext(ctx),
+		Article:    q.Article.WithContext(ctx),
+		Category:   q.Category.WithContext(ctx),
+		DNSTable:   q.DNSTable.WithContext(ctx),
+		FileRecord: q.FileRecord.WithContext(ctx),
+		Home:       q.Home.WithContext(ctx),
 	}
 }
 

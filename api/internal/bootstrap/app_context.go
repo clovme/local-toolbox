@@ -5,24 +5,54 @@
 package bootstrap
 
 import (
-	webDnsRepository "local_dns_proxy/internal/infrastructure/persistence"
-	webDnsService "local_dns_proxy/internal/application/dns"
-	webDnsHandler "local_dns_proxy/internal/interfaces/web"
+	apiArticleRepository "toolbox/internal/infrastructure/persistence"
+	apiArticleService "toolbox/internal/application/article"
+	apiArticleHandler "toolbox/internal/interfaces/api"
 
-	"local_dns_proxy/internal/infrastructure/query"
+	apiCategoryRepository "toolbox/internal/infrastructure/persistence"
+	apiCategoryService "toolbox/internal/application/category"
+	apiCategoryHandler "toolbox/internal/interfaces/api"
+
+	apiHomeRepository "toolbox/internal/infrastructure/persistence"
+	apiHomeService "toolbox/internal/application/home"
+	apiHomeHandler "toolbox/internal/interfaces/api"
+
+	webDnsRepository "toolbox/internal/infrastructure/persistence"
+	webDnsService "toolbox/internal/application/dns"
+	webDnsHandler "toolbox/internal/interfaces/web"
+
+	"toolbox/internal/infrastructure/query"
 	"gorm.io/gorm"
 )
 
 type appContext struct {
+	ApiArticleHandler *apiArticleHandler.ArticleHandler
+	ApiCategoryHandler *apiCategoryHandler.CategoryHandler
+	ApiHomeHandler *apiHomeHandler.HomeHandler
 	WebDnsHandler *webDnsHandler.DnsHandler
 }
 
 func NewAppContext(db *gorm.DB) *appContext {
+	apiArticleRepo := &apiArticleRepository.ApiArticleRepository{DB: db, Q: query.Q}
+	apiArticleService := &apiArticleService.ApiArticleService{Repo: apiArticleRepo}
+	apiArticleHandler := &apiArticleHandler.ArticleHandler{Service: apiArticleService}
+
+	apiCategoryRepo := &apiCategoryRepository.ApiCategoryRepository{DB: db, Q: query.Q}
+	apiCategoryService := &apiCategoryService.ApiCategoryService{Repo: apiCategoryRepo}
+	apiCategoryHandler := &apiCategoryHandler.CategoryHandler{Service: apiCategoryService}
+
+	apiHomeRepo := &apiHomeRepository.ApiHomeRepository{DB: db, Q: query.Q}
+	apiHomeService := &apiHomeService.ApiHomeService{Repo: apiHomeRepo}
+	apiHomeHandler := &apiHomeHandler.HomeHandler{Service: apiHomeService}
+
 	webDnsRepo := &webDnsRepository.WebDnsRepository{DB: db, Q: query.Q}
 	webDnsService := &webDnsService.WebDnsService{Repo: webDnsRepo}
 	webDnsHandler := &webDnsHandler.DnsHandler{Service: webDnsService}
 
 	return &appContext{
+		ApiArticleHandler: apiArticleHandler,
+		ApiCategoryHandler: apiCategoryHandler,
+		ApiHomeHandler: apiHomeHandler,
 		WebDnsHandler: webDnsHandler,
 	}
 }

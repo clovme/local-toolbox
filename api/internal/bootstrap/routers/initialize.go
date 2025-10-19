@@ -1,10 +1,11 @@
 package routers
 
 import (
-	"gorm.io/gorm"
-	"local_dns_proxy/internal/bootstrap/middleware"
-	"local_dns_proxy/internal/core"
 	"time"
+	"toolbox/internal/bootstrap/middleware"
+	"toolbox/internal/core"
+
+	"gorm.io/gorm"
 )
 
 // regeditMiddleware 注册中间件
@@ -23,9 +24,13 @@ func regeditTemplate(engine *core.Engine) {
 
 // regeditRoutes 注册路由
 func regeditRoutes(engine *core.Engine, db *gorm.DB) {
+	v1 := engine.Group("/api/v1")
 	routers := routeGroup{
 		// 接口层
-		dnsApi: engine.Group("/api/v1"),
+		categoryApi: v1,
+		articleApi:  v1,
+		dnsApi:      v1,
+		homeApi:     v1,
 
 		// 视图层
 		dnsView: engine.Group("/"),
@@ -45,8 +50,9 @@ func regeditRoutes(engine *core.Engine, db *gorm.DB) {
 //
 // 返回值：
 //   - *gin.Engine: 初始化后的 Gin 引擎
-func Initialization(db *gorm.DB) *core.Engine {
+func Initialization(db *gorm.DB, uploadSize int64) *core.Engine {
 	engine := core.New()
+	engine.Engine.MaxMultipartMemory = uploadSize
 
 	regeditTemplate(engine)
 	regeditMiddleware(engine)

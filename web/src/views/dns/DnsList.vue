@@ -1,6 +1,12 @@
 <template>
   <PageView>
     <vxe-grid ref="gridRef" v-bind="gridOptions">
+      <template #buttonPrefix>
+        <vxe-button size="medium" status="primary" icon="vxe-icon-add" @click="addEvent">新增</vxe-button>
+      </template>
+      <template #buttonSuffix>
+        <ButtonSuffix />
+      </template>
       <template #domain="{ row }">
         <vxe-link v-if="row.status === 1" :href="`${row.protocol}://${row.domain}:${row.port}`" target="_blank">{{ row.domain }}</vxe-link>
         <vxe-text v-else>{{ row.domain }}</vxe-text>
@@ -22,7 +28,9 @@
 import { ref, reactive } from 'vue'
 import { VxeGridInstance, VxeGridProps } from 'vxe-table'
 import { VxeUI } from 'vxe-pc-ui'
-import { DnsVO, getDnsListPage, postDnsSaveBatch, deleteDnsDelete } from '@/api/dns'
+import { deleteDnsDelete, getDnsListPage, postDnsSaveBatch } from '@/api/dns'
+import ButtonSuffix from './components/ButtonSuffix.vue'
+import { DnsVO } from '@/api/user'
 
 const gridRef = ref<VxeGridInstance<DnsVO>>()
 
@@ -78,10 +86,13 @@ const gridOptions = reactive<VxeGridProps<DnsVO>>({
   toolbarConfig: {
     refresh: true,
     zoom: true,
+    slots: {
+      buttonSuffix: 'buttonSuffix',
+      buttonPrefix: 'buttonPrefix'
+    },
     buttons: [
-      { name: '新增', code: 'insert_edit', status: 'primary', icon: 'vxe-icon-add' },
-      { name: '标记/删除', code: 'mark_cancel', status: 'error', icon: 'vxe-icon-delete' },
-      { name: '保存', code: 'save', status: 'success', icon: 'vxe-icon-save' }
+      { size: 'medium', name: '标记/删除', code: 'mark_cancel', status: 'error', icon: 'vxe-icon-delete' },
+      { size: 'medium', name: '保存', code: 'save', status: 'success', icon: 'vxe-icon-save' }
     ]
   },
   pagerConfig: {
@@ -95,7 +106,7 @@ const gridOptions = reactive<VxeGridProps<DnsVO>>({
     { field: 'ip', title: '映射IP', sortable: true, width: 150, editRender: { name: 'VxeInput' } },
     { field: 'port', title: '映射端口', sortable: true, width: 120, editRender: { name: 'VxeInput' } },
     { field: 'status', title: '启用状态', sortable: true, width: 110, align: 'center', cellRender: statusCellRender },
-    { title: '描述', minWidth: 200, slots: { default: 'description' } },
+    { field: 'description', title: '描述', minWidth: 200, slots: { default: 'description' } },
     { field: 'updatedAt', title: '更新时间', width: 160, formatter: 'FormatDateTime', sortable: true },
     { field: 'createdAt', title: '创建时间', width: 160, formatter: 'FormatDateTime', sortable: true },
     { field: 'action', title: '操作', width: 160, slots: { default: 'action' } }
@@ -140,6 +151,20 @@ const removeRow = async (row: DnsVO) => {
     })
   }
 }
+
+const addEvent = async () => {
+  const $grid = gridRef.value
+  if ($grid) {
+    const { row: newRow } = await $grid.insert({
+      protocol: 'http',
+      ip: '127.0.0.1',
+      port: 80,
+      status: 1
+    })
+    // 激活并自动聚焦
+    $grid.setEditRow(newRow, 'domain')
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -152,5 +177,8 @@ const removeRow = async (row: DnsVO) => {
   .vxe-switch--button {
     background-color: var(--vxe-ui-switch-open-background-color);
   }
+}
+.right-item-comp {
+  vertical-align: middle;
 }
 </style>

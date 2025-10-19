@@ -2,14 +2,16 @@ package core
 
 import (
 	"fmt"
-	"github.com/gin-contrib/gzip"
-	"github.com/gin-gonic/gin"
 	"html/template"
-	"local_dns_proxy/pkg/logger/log"
-	"local_dns_proxy/pkg/utils/file"
-	"local_dns_proxy/public"
 	"os"
 	"sort"
+	"toolbox/pkg/constants"
+	"toolbox/pkg/logger/log"
+	"toolbox/pkg/utils/file"
+	"toolbox/public"
+
+	"github.com/gin-contrib/gzip"
+	"github.com/gin-gonic/gin"
 )
 
 // Engine 自定义gin.Engine
@@ -138,7 +140,8 @@ func (engine *Engine) Run(ip string, port int) {
 	if err != nil {
 		return
 	}
-	log.Info().Msgf("程序所在路径 %s", absPath)
+	log.Info().Msgf("数据所在路径：%s", constants.DataPath)
+	log.Info().Msgf("程序所在路径：%s", absPath)
 
 	addr := fmt.Sprintf("%s:%d", ip, port) // ⚠️ 用IP，不要用Domain
 	if err := engine.Engine.Run(addr); err != nil {
@@ -174,6 +177,7 @@ func New(opts ...gin.OptionFunc) *Engine {
 
 	// 创建 gin web 实例
 	engine := gin.New(opts...)
+	//engine.MaxMultipartMemory = 200 << 20 // (n << 20)MB
 	// 注册全局 gzip
 	engine.Use(gzip.Gzip(gzip.DefaultCompression))
 

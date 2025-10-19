@@ -4,7 +4,7 @@
       <vxe-layout-header>
         <HeaderView />
       </vxe-layout-header>
-      <vxe-layout-body :key="appStore.pageKey" class="page-body">
+      <vxe-layout-body class="page-body">
         <RouterView />
       </vxe-layout-body>
       <vxe-layout-footer>

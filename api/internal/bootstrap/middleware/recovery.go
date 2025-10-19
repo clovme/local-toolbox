@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"local_dns_proxy/internal/core"
-	"local_dns_proxy/pkg/enums/code"
-	httpLog "local_dns_proxy/pkg/logger/http"
+	"toolbox/internal/core"
+	"toolbox/pkg/enums/code"
+	httpLog "toolbox/pkg/logger/http"
 )
 
 // RecoveryMiddleware panic 捕捉中间件
@@ -15,7 +15,7 @@ func RecoveryMiddleware() core.HandlerFunc {
 				httpLog.Panic(c.Context).Interface("panic", err).Msg("捕捉到请求异常")
 
 				// 返回统一处理
-				c.JsonSafeDesc(code.ServerInternalError, nil)
+				c.JsonDesc(code.ServerInternalError, nil)
 
 				// 强制中断后续
 				c.AbortWithStatus(500)

@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/miekg/dns"
-	"local_dns_proxy/pkg/logger/log"
 	"net"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 	"time"
+	"toolbox/pkg/logger/log"
 )
 
 type DNSProxy struct {
@@ -31,10 +31,25 @@ type NetIface struct {
 }
 
 var (
-	ctxStatus  context.Context
-	cancelStop context.CancelFunc
-	dnsProxy   *DNSProxy
+	serviceCtxStatus  context.Context
+	serviceCancelStop context.CancelFunc
+	dnsProxy          *DNSProxy
 )
+
+// flushDNSCache 清空系统 DNS 缓存
+func flushDNSCache() {
+	switch runtime.GOOS {
+	case "windows":
+		_ = exec.Command("ipconfig", "/flushdns").Run()
+	case "darwin":
+		_ = exec.Command("dscacheutil", "-flushcache").Run()
+		_ = exec.Command("killall", "-HUP", "mDNSResponder").Run()
+	case "linux":
+		if err := exec.Command("systemd-resolve", "--flush-caches").Run(); err != nil {
+			_ = exec.Command("resolvectl", "flush-caches").Run()
+		}
+	}
+}
 
 // handleDNS 处理 DNS 请求
 func (r *DNSProxy) handleDNS(w dns.ResponseWriter, msg *dns.Msg) {
@@ -96,28 +111,30 @@ func (r *DNSProxy) StartDnsServer() {
 			log.Error().Err(err).Msg("本地 TCP DNS 启动失败！")
 		}
 	}()
+
 	time.Sleep(500 * time.Millisecond)
 	for domain, ip := range r.hosts {
 		log.Info().Msgf("[DNS代理] 已注册临时域名映射: %s -> %s", domain, ip)
 	}
 
+	flushDNSCache()
 	r.CancelStop()
-	<-ctxStatus.Done()
-	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer shutdownCancel()
+	r.IsRunning = true
+	<-serviceCtxStatus.Done()
 	flag := true
-	if err := udpServer.ShutdownContext(shutdownCtx); err != nil {
+
+	if err := udpServer.ShutdownContext(context.Background()); err != nil {
 		flag = false
 		log.Error().Err(err).Msg("本地 UDP DNS 关闭失败！")
 	}
-	if err := tcpServer.ShutdownContext(shutdownCtx); err != nil {
+	if err := tcpServer.ShutdownContext(context.Background()); err != nil {
 		flag = false
 		log.Error().Err(err).Msg("本地 TCP DNS 关闭失败！")
 	}
 	if flag {
 		dnsProxy = nil
-		ctxStatus = nil
-		cancelStop = nil
+		serviceCtxStatus = nil
+		serviceCancelStop = nil
 
 		log.Info().Msg("[DNS代理] 本地 DNS 服务已停止")
 	}
@@ -161,9 +178,10 @@ func (r *DNSProxy) RestoreDNS(ifaceName string) error {
 	if dnsProxy == nil {
 		return nil
 	}
-	cancelStop()
+	serviceCancelStop()
 	switch runtime.GOOS {
 	case "windows":
+		// 恢复 DNS
 		cmd := exec.Command("netsh", "interface", "ipv4", "set", "dns", ifaceName, "dhcp")
 		log.Debug().Str("Name", ifaceName).Str("OS", runtime.GOOS).Str("cmd", strings.Join(cmd.Args, " ")).Msg("[DNS代理] 系统代理DNS恢复")
 		if err := cmd.Run(); err != nil {
@@ -188,7 +206,9 @@ func (r *DNSProxy) RestoreDNS(ifaceName string) error {
 		log.Error().Msgf("不支持的操作系统：%s", runtime.GOOS)
 		return fmt.Errorf("不支持的操作系统：%s", runtime.GOOS)
 	}
-	log.Info().Msg("[DNS代理] 恢复系统 DNS 代理")
+
+	flushDNSCache() // ✅ 恢复后清缓存
+	log.Info().Msg("[DNS代理] 恢复系统 DNS 代理并清空 DNS 缓存")
 	return nil
 }
 
@@ -225,8 +245,8 @@ func GetNetworkInterfaces() ([]NetIface, error) {
 
 func NewDNSProxy(hosts map[string]string) *DNSProxy {
 	if dnsProxy == nil {
-		ctxStatus, cancelStop = context.WithCancel(context.Background())
-		dnsProxy = &DNSProxy{IsRunning: true}
+		serviceCtxStatus, serviceCancelStop = context.WithCancel(context.Background())
+		dnsProxy = &DNSProxy{}
 		dnsProxy.CtxStatus, dnsProxy.CancelStop = context.WithCancel(context.Background())
 	}
 	dnsProxy.hosts = hosts

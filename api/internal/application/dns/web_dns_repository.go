@@ -1,9 +1,9 @@
 package dns
 
 import (
-	dnsDTO "local_dns_proxy/internal/schema/dto/dns"
-	dnsVO "local_dns_proxy/internal/schema/vo/dns"
-	"local_dns_proxy/pkg/utils"
+	dnsDTO "toolbox/internal/schema/dto/dns"
+	dnsVO "toolbox/internal/schema/vo/dns"
+	"toolbox/pkg/utils"
 )
 
 type Repository interface {

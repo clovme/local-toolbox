@@ -2,10 +2,11 @@ package http
 
 import (
 	"bytes"
-	"local_dns_proxy/pkg/logger"
+	"io/ioutil"
+	"toolbox/pkg/logger"
+
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
-	"io/ioutil"
 )
 
 // 核心字段统一封装
@@ -24,7 +25,6 @@ func _field(_log *zerolog.Event, c *gin.Context) *zerolog.Event {
 	return _log.Str("Method", c.Request.Method).
 		Str("TraceID", c.GetHeader("X-Trace-Id")).
 		Int("Status", c.Writer.Status()).
-		Str("X-Requested-With", c.GetHeader("X-Requested-With")).
 		Str("ClientIP", c.ClientIP()).
 		Str("UserAgent", c.Request.UserAgent()).
 		Str("Path", c.Request.URL.Path).

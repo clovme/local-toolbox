@@ -1,5 +1,5 @@
 {
-  "name": "local-dns-proxy",
+  "name": "local-toolbox",
   "description": "本地DNS代理管理",
   "private": true,
   "version": "4.0.0",
@@ -13,11 +13,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@vavt/v3-extension": "^3.0.0",
     "@vxe-ui/plugin-export-xlsx": "^4.0.7",
     "@vxe-ui/plugin-menu": "^4.0.2",
     "@vxe-ui/plugin-render-wangeditor": "^4.0.2",
     "axios": "^1.7.2",
-    "echarts": "^5.5.1",
+    "crypto-js": "^4.2.0",
+    "json-bigint": "^1.0.0",
+    "md-editor-v3": "^6.0.1",
     "nprogress": "^0.2.0",
     "pinia": "^2.1.7",
     "tinycolor2": "^1.6.0",
@@ -29,11 +32,13 @@
     "xe-utils": "^3.7.9"
   },
   "devDependencies": {
+    "@types/json-bigint": "^1.0.4",
     "@types/node": "^24.1.0",
     "@typescript-eslint/eslint-plugin": "~4.32.0",
     "@typescript-eslint/parser": "~4.32.0",
     "@vitejs/plugin-vue": "~6.0.1",
     "@vitejs/plugin-vue-jsx": "~5.0.1",
+    "autoprefixer": "^10.4.21",
     "del": "~6.0.0",
     "eslint": "~7.13.0",
     "eslint-config-prettier": "~6.15.0",

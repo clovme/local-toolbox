@@ -5,7 +5,7 @@ GOOS   = windows
 GOARCH = amd64
 
 [filename]
-name    = local_dns_proxy
+name    = toolbox
 is_plat = false
 is_arch = false
 is_ver  = false
@@ -18,7 +18,7 @@ is_upx  = true
 is_mode = false
 plat    = windows
 arch    = amd64
-version = 0,4,8
+version = 1,6,8
 
 [other]
 isComment  = false

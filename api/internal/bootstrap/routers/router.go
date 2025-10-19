@@ -5,27 +5,46 @@
 package routers
 
 import (
-	"local_dns_proxy/internal/bootstrap"
-	"local_dns_proxy/internal/core"
+	"toolbox/internal/bootstrap"
+	"toolbox/internal/core"
 	"gorm.io/gorm"
 )
 
 type routeGroup struct {
+	articleApi *core.RouterGroup
+	categoryApi *core.RouterGroup
 	dnsApi *core.RouterGroup
 	dnsView *core.RouterGroup
+	homeApi *core.RouterGroup
 }
 
 func (r *routeGroup) register(db *gorm.DB) {
 	// 初始化仓库和服务
 	ctx := bootstrap.NewAppContext(db)
 
+	r.articleApi.GET("/readme", ctx.ApiArticleHandler.ArticleHandler, "articleApi", "article", "获取Md说明文档")
+	r.articleApi.POST("/upload/images", ctx.ApiArticleHandler.PostUploadImagesHandler, "articleApi", "uploadImages", "图片上传")
+	r.articleApi.GET("/article/list", ctx.ApiArticleHandler.GetArticleListHandler, "articleApi", "articleListGet", "获取文章列表")
+	r.articleApi.GET("/article", ctx.ApiArticleHandler.GetArticleHandler, "articleApi", "articleGet", "获取文章列表")
+	r.articleApi.POST("/article", ctx.ApiArticleHandler.PostArticleHandler, "articleApi", "articleAdd", "添加文章")
+	r.articleApi.PUT("/article", ctx.ApiArticleHandler.PutArticleHandler, "articleApi", "articleUpdate", "添加文章")
+	r.articleApi.DELETE("/article", ctx.ApiArticleHandler.DeleteArticleHandler, "articleApi", "articleDelete", "添加文章")
+
+	r.categoryApi.GET("/category", ctx.ApiCategoryHandler.GetCategoryHandler, "categoryApi", "categoryGet", "获取分类数据")
+	r.categoryApi.DELETE("/category", ctx.ApiCategoryHandler.DeleteCategoryHandler, "categoryApi", "categoryDelete", "删除指定分类")
+	r.categoryApi.POST("/category", ctx.ApiCategoryHandler.PostCategoryHandler, "categoryApi", "categoryAdd", "新增分类")
+	r.categoryApi.PUT("/category", ctx.ApiCategoryHandler.PutCategoryHandler, "categoryApi", "categoryUpdate", "新增分类")
+
+	r.dnsApi.GET("/enums", ctx.WebDnsHandler.GetEnumsHandler, "dnsApi", "enumsMap", "获取枚举映射")
 	r.dnsApi.GET("/copyright", ctx.WebDnsHandler.CopyrightHandler, "dnsApi", "copyright", "版权")
 	r.dnsApi.GET("/list", ctx.WebDnsHandler.PageHandler, "dnsApi", "dnsList", "获取DNS列表")
 	r.dnsApi.POST("/save", ctx.WebDnsHandler.SaveHandler, "dnsApi", "dnsSave", "保存DNS数据")
 	r.dnsApi.DELETE("/delete", ctx.WebDnsHandler.DeleteHandler, "dnsApi", "dnsDelete", "删除DNS数据")
-	r.dnsApi.POST("/service/running/:first/:iface", ctx.WebDnsHandler.ServiceRunningHandler, "dnsApi", "dnsServiceRunning", "启动DNS服务")
-	r.dnsApi.POST("/service/stop/:first/:iface", ctx.WebDnsHandler.ServiceStopHandler, "dnsApi", "dnsServiceStop", "禁用DNS服务")
+	r.dnsApi.POST("/service/running/:iface", ctx.WebDnsHandler.ServiceRunningHandler, "dnsApi", "dnsServiceRunning", "启动DNS服务")
+	r.dnsApi.POST("/service/stop/:iface", ctx.WebDnsHandler.ServiceStopHandler, "dnsApi", "dnsServiceStop", "禁用DNS服务")
 	r.dnsApi.GET("/network/interfaces", ctx.WebDnsHandler.GetNetIfaceHandler, "dnsApi", "dnsNetIface", "获取网络接口列表")
 
 	r.dnsView.GET("/", ctx.WebDnsHandler.GetViewsIndexHandler, "dnsView", "indexView", "首页视图")
+
+	r.homeApi.GET("/home/data", ctx.ApiHomeHandler.HomeDataHandler, "homeApi", "homeGet", "获取首页数据")
 }

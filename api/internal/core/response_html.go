@@ -1,8 +1,8 @@
 package core
 
 import (
-	"local_dns_proxy/pkg/constants"
 	"net/http"
+	"toolbox/pkg/constants"
 )
 
 // HTMLResponse 自定义HTML响应

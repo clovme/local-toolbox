@@ -1,8 +1,8 @@
 package log
 
 import (
-	"local_dns_proxy/pkg/logger"
 	"github.com/rs/zerolog"
+	"toolbox/pkg/logger"
 )
 
 // Debug 不同 level 封装

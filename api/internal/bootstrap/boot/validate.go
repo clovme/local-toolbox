@@ -3,7 +3,7 @@ package boot
 import (
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"local_dns_proxy/internal/bootstrap/boot/validate"
+	"toolbox/internal/bootstrap/boot/validate"
 )
 
 // InitializationFormValidate 初始化表单验证器

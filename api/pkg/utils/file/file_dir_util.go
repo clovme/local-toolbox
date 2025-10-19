@@ -34,6 +34,19 @@ func IsFileExist(filePath string) bool {
 	return !info.IsDir()
 }
 
+// CreateDir 创建目录
+// 参数：
+//   - folderPath 文件夹路径
+//
+// 返回值：
+//   - err 错误信息
+func CreateDir(folderPath string) error {
+	if !IsDirExist(folderPath) {
+		return os.MkdirAll(folderPath, os.ModePerm)
+	}
+	return nil
+}
+
 // GetFileAbsPath 获取文件绝对路径
 // 参数：
 //   - inPath 输入路径

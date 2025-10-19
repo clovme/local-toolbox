@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"local_dns_proxy/pkg/constants"
-	httpLog "local_dns_proxy/pkg/logger/http"
 	"strings"
 	"time"
+	"toolbox/pkg/constants"
+	httpLog "toolbox/pkg/logger/http"
 
 	"github.com/gin-gonic/gin"
 )

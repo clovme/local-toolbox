@@ -4,12 +4,17 @@
 package constants
 
 const (
-	ProjectName = "local_dns" // 项目名称
-	WebTitle    = "本地DNS代理"
+	ProjectName = "toolbox" // 项目名称
+	WebTitle    = "本地系统工具箱"
 
 	HttpLogKey = "HTTP_LOG_KEY"
 	LimitPage  = "LIMIT_PAGE"
 
 	DNSStop    = "stop"
 	DNSRunning = "running"
+)
+
+var (
+	DataPath   = "."
+	UploadPath = "upload"
 )

@@ -2,26 +2,11 @@
   <div class="page-header">
     <div class="header-left">
       <div class="aside-logo">
-        <img class="logo-img" draggable="false" src="@/assets/logo.png" />
-        <vxe-text class="logo-title">本地DNS代理管理</vxe-text>
+        <img class="logo-img" draggable="false" :src="`/assets/icon-${appStore.icon}.png`" />
+        <vxe-link :underline="false" :router-link="{name: 'Home'}" class="logo-title">{{ appStore.webTitle }}</vxe-link>
       </div>
     </div>
     <div class="header-right">
-      <span class="right-item">
-        <span class="right-item-title">代理网卡：</span>
-        <vxe-pulldown :options="nif" trigger="click" class="right-item-comp" show-popup-shadow transfer  @option-click="networkInterfacesClickEvent">
-          <template #default>
-            <vxe-text>{{ iface }}</vxe-text>
-            <vxe-icon name="caret-down"></vxe-icon>
-          </template>
-        </vxe-pulldown>
-      </span>
-
-      <span class="right-item">
-        <span class="right-item-title">服务状态：</span>
-        <vxe-switch class="right-item-comp switch-service" v-model="switchService" size="mini" open-value="running" open-label="运行中" close-value="stop" close-label="未启动"></vxe-switch>
-      </span>
-
       <span class="right-item">
         <vxe-switch class="right-item-comp" v-model="currTheme" size="mini" open-value="light" open-label="白天" close-value="dark" close-label="夜间"></vxe-switch>
       </span>
@@ -40,9 +25,8 @@
         </vxe-pulldown>
       </span>
 
-      <span class="right-item">
+      <span>
         <div class="user-avatar">
-          <vxe-text>DNS</vxe-text>
           <img class="user-picture" draggable="false" src="@/assets/default-picture.gif">
         </div>
       </span>
@@ -54,38 +38,13 @@
 import { ref, computed } from 'vue'
 import { VxeGlobalI18nLocale, VxePulldownEvents } from 'vxe-pc-ui'
 import { useAppStore } from '@/store/app'
-import { getNetworkInterfaces } from '@/api/dns'
-
-const iface = ref('')
-const nif = ref<{ label: string, value: string }[]>([])
 
 const appStore = useAppStore()
-
-getNetworkInterfaces().then(res => {
-  // @ts-ignore
-  window.isFirstLoading = 'first'
-  const items: { label: string, value: string }[] = []
-  res.data.ifaces.forEach(item => {
-    items.push({ label: item.name, value: item.name })
-  })
-  nif.value = items
-  iface.value = res.data.iface
-  switchService.value = res.data.running
-})
 
 const langPullList = ref([
   { label: '中文', value: 'zh-CN' },
   { label: '英文', value: 'en-US' }
 ])
-
-const switchService = computed({
-  get () {
-    return appStore.serviceStatus
-  },
-  set (status) {
-    appStore.setServiceStatus(status, iface.value)
-  }
-})
 
 const langLabel = computed(() => {
   const item = langPullList.value.find(item => item.value === appStore.language)
@@ -133,10 +92,6 @@ const sizeOptions = ref([
 const langOptionClickEvent: VxePulldownEvents.OptionClick = ({ option }) => {
   appStore.setLanguage(option.value as VxeGlobalI18nLocale)
 }
-
-const networkInterfacesClickEvent: VxePulldownEvents.OptionClick = ({ option }) => {
-  iface.value = option.value as string
-}
 </script>
 
 <style lang="scss" scoped>
@@ -149,14 +104,17 @@ const networkInterfacesClickEvent: VxePulldownEvents.OptionClick = ({ option }) 
   border-bottom: 1px solid var(--page-layout-border-color);
 
   .header-left {
+    gap: 5px;
     flex-grow: 1;
+    display: flex;
+    align-items: center;
 
     .aside-logo {
       display: flex;
       flex-direction: row;
       align-items: center;
       flex-shrink: 0;
-      padding: 8px 16px;
+      padding: 8px 0 8px 16px;
       user-select: none;
 
       .logo-img {
@@ -171,6 +129,8 @@ const networkInterfacesClickEvent: VxePulldownEvents.OptionClick = ({ option }) 
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        user-select: none;
+        -webkit-user-drag: none;
       }
     }
   }
@@ -184,7 +144,7 @@ const networkInterfacesClickEvent: VxePulldownEvents.OptionClick = ({ option }) 
 
   .right-item {
     cursor: pointer;
-    margin-left: 10px;
+    margin-left: 24px;
   }
   .right-item-title {
     vertical-align: middle;
@@ -209,12 +169,6 @@ const networkInterfacesClickEvent: VxePulldownEvents.OptionClick = ({ option }) 
 
   .collapseBtn {
     font-size: 18px;
-  }
-
-  .switch-service.vxe-switch.is--on {
-    :deep(.vxe-switch--button) {
-      background-color: var(--vxe-ui-status-error-color);
-    }
   }
 }
 </style>

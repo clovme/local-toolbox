@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"gorm.io/gen/field"
 	"gorm.io/gorm"
-	"local_dns_proxy/internal/infrastructure/query"
-	dnsDTO "local_dns_proxy/internal/schema/dto/dns"
-	dnsVO "local_dns_proxy/internal/schema/vo/dns"
-	"local_dns_proxy/pkg/enums/status"
-	"local_dns_proxy/pkg/utils"
 	"strings"
+	"toolbox/internal/infrastructure/query"
+	dnsDTO "toolbox/internal/schema/dto/dns"
+	dnsVO "toolbox/internal/schema/vo/dns"
+	"toolbox/pkg/enums/status"
+	"toolbox/pkg/utils"
 )
 
 type WebDnsRepository struct {

@@ -2,10 +2,10 @@ package copyright
 
 import (
 	"fmt"
-	"local_dns_proxy/pkg/constants"
-	"local_dns_proxy/version"
 	"os"
 	"runtime"
+	"toolbox/pkg/constants"
+	"toolbox/version"
 )
 
 // _copyright 版权信息

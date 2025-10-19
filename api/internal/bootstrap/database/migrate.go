@@ -7,9 +7,10 @@ package database
 import (
 	"errors"
 	"fmt"
-	"local_dns_proxy/internal/bootstrap/database/initdata"
-	"local_dns_proxy/internal/models"
-	"local_dns_proxy/internal/infrastructure/query"
+	"toolbox/internal/bootstrap/database/initdata"
+	"toolbox/internal/core"
+	"toolbox/internal/models"
+	"toolbox/internal/infrastructure/query"
 	"gorm.io/gorm"
 	"reflect"
 	"strings"
@@ -58,16 +59,20 @@ func autoMigrateWithComments(db *gorm.DB, tables ...interface{}) error {
 //
 // 返回值:
 //   - error: 迁移错误
-func AutoMigrate(db *gorm.DB, dbq *query.Query) error {
+func AutoMigrate(db *gorm.DB, dbq *query.Query, router []core.RoutesInfo) error {
 	err := autoMigrateWithComments(db,
+		&models.Article{},
+		&models.Category{},
 		&models.DNSTable{},
+		&models.FileRecord{},
+		&models.Home{},
 	)
 
 	if err != nil {
 		return err
 	}
 	
-	v := reflect.ValueOf(&initdata.InitData{Q: query.Q})
+	v := reflect.ValueOf(&initdata.InitData{Router: router, Q: query.Q})
 	for i := 0; i < v.NumMethod(); i++ {
 		v.Method(i).Call(nil)
 	}

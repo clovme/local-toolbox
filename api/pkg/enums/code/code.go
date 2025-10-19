@@ -1,8 +1,8 @@
 package code
 
 import (
-	"local_dns_proxy/pkg/enums"
 	"sort"
+	"toolbox/pkg/enums"
 )
 
 type ResponseCode int
@@ -16,19 +16,20 @@ const (
 
 	// 业务错误
 	ServiceVerifyError ResponseCode = iota + 19998
+	ServiceQueryError
 	ServiceInsertError
 	ServiceDeleteError
 	ServiceUpdateError
 
 	// 请求错误
-	RequestBadRequest ResponseCode = iota + 39984
+	RequestBadRequest ResponseCode = iota + 39983
 	RequestUnauthorized
 	RequestForbidden
 	RequestNotFound
 	RequestUnknown
 
 	// 服务器内部错误
-	ServerInternalError ResponseCode = iota + 49989
+	ServerInternalError ResponseCode = iota + 49988
 )
 
 var (
@@ -39,6 +40,7 @@ var (
 
 		// 业务错误
 		ServiceVerifyError: {Key: "ServiceVerifyError", Name: "验证失败", Desc: "数据验证失败，请检查输入数据！"},
+		ServiceQueryError:  {Key: "ServiceQueryError", Name: "查询失败", Desc: "数据查询失败，请重试！"},
 		ServiceInsertError: {Key: "ServiceInsertError", Name: "创建失败", Desc: "数据创建失败，请重试！"},
 		ServiceDeleteError: {Key: "ServiceDeleteError", Name: "删除失败", Desc: "数据删除失败，请重试！"},
 		ServiceUpdateError: {Key: "ServiceUpdateError", Name: "更新失败", Desc: "数据更新失败，请重试！"},
@@ -64,37 +66,37 @@ func init() {
 }
 
 // Key 获取enums.Key
-func (c ResponseCode) Key() string {
-	if meta, ok := initiate[c]; ok {
+func (r ResponseCode) Key() string {
+	if meta, ok := initiate[r]; ok {
 		return meta.Key
 	}
 	return "Unknown"
 }
 
 // Name 获取枚举名称
-func (c ResponseCode) Name() string {
-	if meta, ok := initiate[c]; ok {
+func (r ResponseCode) Name() string {
+	if meta, ok := initiate[r]; ok {
 		return meta.Name
 	}
 	return "未知错误"
 }
 
 // Desc 获取枚举描述
-func (c ResponseCode) Desc() string {
-	if meta, ok := initiate[c]; ok {
+func (r ResponseCode) Desc() string {
+	if meta, ok := initiate[r]; ok {
 		return meta.Desc
 	}
 	return "未知错误或异常，请检查请求参数或联系管理员"
 }
 
 // Int 获取枚举值
-func (c ResponseCode) Int() int {
-	return int(c)
+func (r ResponseCode) Int() int {
+	return int(r)
 }
 
 // Is 比较枚举值
-func (c ResponseCode) Is(v ResponseCode) bool {
-	return v == c
+func (r ResponseCode) Is(v ResponseCode) bool {
+	return v == r
 }
 
 // Code 获取Code
@@ -105,8 +107,8 @@ func Code(key string) ResponseCode {
 	return RequestUnknown
 }
 
-// Values 获取所有枚举
-func Values() []ResponseCode {
+// ValueList 获取所有枚举列表
+func ValueList() []ResponseCode {
 	values := make([]ResponseCode, 0, len(initiate))
 	for k := range initiate {
 		values = append(values, k)
@@ -115,4 +117,13 @@ func Values() []ResponseCode {
 		return values[i] < values[j]
 	})
 	return values
+}
+
+// ValueMap 获取所有枚举Map（安全副本）
+func ValueMap() map[ResponseCode]enums.Enums {
+	copyMap := make(map[ResponseCode]enums.Enums, len(initiate))
+	for k, v := range initiate {
+		copyMap[k] = v
+	}
+	return copyMap
 }

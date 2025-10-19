@@ -1,24 +1,23 @@
 package boot
 
 import (
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"local_dns_proxy/internal/infrastructure/query"
-	"local_dns_proxy/pkg/constants"
-	"local_dns_proxy/pkg/logger"
-	"local_dns_proxy/pkg/logger/log"
-	"local_dns_proxy/pkg/utils/file"
 	"os"
 	"time"
+	"toolbox/internal/infrastructure/query"
+	"toolbox/pkg/constants"
+	"toolbox/pkg/logger"
+	"toolbox/pkg/logger/log"
+	"toolbox/pkg/utils/file"
 )
 
 // InitializationDB 打开数据库连接, 并设置连接池, 数据库链接统一入口
 // 返回值：
 //   - *gorm.DB 数据库连接对象
 func InitializationDB() *gorm.DB {
-	dbPath, err := file.GetFileAbsPath(fmt.Sprintf("%s_data.db", constants.ProjectName))
+	dbPath, err := file.GetFileAbsPath(constants.DataPath, "data.db")
 	if err != nil {
 		return nil
 	}

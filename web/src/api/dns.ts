@@ -1,16 +1,5 @@
 import { requestAjax } from './http'
 
-export interface DnsVO {
-  id: number
-  protocol: string
-  domain: string
-  ip: string
-  status: string
-  port: string
-  updatedAt: string
-  createdAt: string
-}
-
 export function getDnsListPage (params?: any) {
   return requestAjax({
     url: '/list',
@@ -50,10 +39,9 @@ export function deleteDnsDelete (data?: any) {
 }
 
 export function postDnsService (action: string, iface: string) {
-  // @ts-ignore
-  const first = window.isFirstLoading
+  action = action === 'running' ? 'stop' : 'running'
   return requestAjax({
-    url: `/service/${action}/${first}/${iface}`,
+    url: `/service/${action}/${iface}`,
     method: 'post'
   })
 }

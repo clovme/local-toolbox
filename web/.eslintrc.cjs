@@ -26,6 +26,15 @@ module.exports = {
   rules: {
     'array-bracket-spacing': ['error', 'never'],
     'no-debugger': ['error'],
-    'vue/no-v-model-argument': 'off'
-  }
+    'vue/no-v-model-argument': 'off',
+    'no-unused-vars': 'off'
+  },
+  overrides: [
+    {
+      files: ['*.d.ts'],
+      rules: {
+        'no-unused-vars': 'off'
+      }
+    }
+  ]
 }

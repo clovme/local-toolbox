@@ -1,12 +1,12 @@
 package dns
 
 import (
-	"local_dns_proxy/pkg/enums/status"
 	"time"
+	"toolbox/pkg/enums/status"
 )
 
 type WebDNSTableVO struct {
-	ID        int64         `json:"id"`
+	ID        string        `json:"id"`
 	Protocol  string        `json:"protocol"`
 	Domain    string        `json:"domain"`
 	IP        string        `json:"ip"`
