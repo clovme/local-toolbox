@@ -44,7 +44,7 @@ export interface CategoryVO {
   id: string
   name: string
   title: string
-  description: string
+  docSort: string
   articleCount: number
   pid: string
   sort: number
@@ -59,11 +59,12 @@ export interface CategoryAddVO {
   title: string
   pid: string
   sort: number
-  description: string
+  docSort: string
 }
 
 export interface ArticleListVO {
   id: string
+  docSort: string
   categoryID: string
   categoryName: string
   categoryTitle: string

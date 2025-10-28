@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CryptoJS from 'crypto-js'
-import { ref, onMounted, reactive, watch } from 'vue'
+import { ref, onMounted, reactive, watch, computed } from 'vue'
 import { config, PreviewThemes, Themes, ToolbarNames, MdEditor } from 'md-editor-v3'
 
 import type { CompletionSource } from '@codemirror/autocomplete'
@@ -11,9 +11,9 @@ import '@/style/Emoji.scss'
 import { useRoute, useRouter } from 'vue-router'
 import { VxeFormEvents, VxeFormInstance, VxeFormPropTypes, VxeTreeSelectPropTypes, VxeUI } from 'vxe-pc-ui'
 import { ArticleDataVO } from '@/utils/interface'
-import { getArticle, getCategory, getReadme, optionArticle, postUploadImg } from '@/api/article'
-import { CategoryVO } from '@/api/user'
-import { buildCategoryTree, newTime } from '@/utils'
+import { getArticle, getReadme, optionArticle, postUploadImg } from '@/api/article'
+import { newTime } from '@/utils'
+import { useArticleStore } from '@/store/article'
 
 const route = useRoute()
 const router = useRouter()
@@ -21,7 +21,6 @@ const router = useRouter()
 const showPopup = ref(false)
 const formDataHash = ref('')
 const modelTitle = ref<string>(route.params.type === 'add' ? '添加 - 保存文档' : '编辑 - 保存文档')
-const treeList = ref<CategoryVO[]>([])
 const formRef = ref<VxeFormInstance<ArticleDataVO>>()
 const formData = ref<ArticleDataVO>({
   id: '0',
@@ -32,20 +31,11 @@ const formData = ref<ArticleDataVO>({
   summary: '',
   content: ''
 })
+const useArticle = useArticleStore()
 const editorRef = ref<InstanceType<typeof MdEditor> | null>(null)
 const theme = ref<Themes>((localStorage.getItem('APP_THEME') || 'light') as Themes)
 
 async function initArticleInfo (query) {
-  getCategory().then(rest => {
-    treeList.value = []
-    buildCategoryTree(rest.data).forEach((item) => {
-      if (item.name === 'all') {
-        return
-      }
-      treeList.value.push(item)
-    })
-  })
-
   if (route.params.type === 'add') {
     const res = await getReadme()
     formData.value.content = res.data
@@ -240,6 +230,7 @@ const onUploadImg = async (files: File[], callback: (urls: string[]) => void) =>
   )
   callback(res.map((item: any) => item))
 }
+useArticle.fetchCategoryTreeList(route.query, router)
 </script>
 
 <template>
@@ -280,7 +271,7 @@ const onUploadImg = async (files: File[], callback: (urls: string[]) => void) =>
         </vxe-form-item>
         <vxe-form-item title="属于" field="categoryID" span="24" :item-render="{}">
           <template #default>
-            <vxe-tree-select v-model="formData.categoryID" :tree-config="treeConfig" :options="treeList" :option-props="{label: 'title', value: 'id'}"></vxe-tree-select>
+            <vxe-tree-select v-model="formData.categoryID" :tree-config="treeConfig" :options="useArticle.treeList" :option-props="{label: 'title', value: 'id'}"></vxe-tree-select>
           </template>
         </vxe-form-item>
         <vxe-form-item title="标签" field="tags" span="24" :item-render="{}">

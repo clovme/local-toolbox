@@ -30,7 +30,7 @@ func newCategory(db *gorm.DB, opts ...gen.DOOption) category {
 	_category.ID = field.NewInt64(tableName, "id")
 	_category.Name = field.NewString(tableName, "name")
 	_category.Title = field.NewString(tableName, "title")
-	_category.Description = field.NewString(tableName, "description")
+	_category.DocSort = field.NewString(tableName, "doc_sort")
 	_category.Pid = field.NewInt64(tableName, "pid")
 	_category.Sort = field.NewInt(tableName, "sort")
 	_category.CreatedAt = field.NewTime(tableName, "created_at")
@@ -44,15 +44,15 @@ func newCategory(db *gorm.DB, opts ...gen.DOOption) category {
 type category struct {
 	categoryDo
 
-	ALL         field.Asterisk
-	ID          field.Int64  // ID
-	Name        field.String // 分类名称(英文)
-	Title       field.String // 分类名称(中文)
-	Description field.String // 备注说明
-	Pid         field.Int64  // 父ID
-	Sort        field.Int    // 排序值，值越大越靠前，默认0
-	CreatedAt   field.Time   // 创建时间
-	UpdatedAt   field.Time   // 更新时间
+	ALL       field.Asterisk
+	ID        field.Int64  // ID
+	Name      field.String // 分类名称(英文)
+	Title     field.String // 分类名称(中文)
+	DocSort   field.String // 排序字段
+	Pid       field.Int64  // 父ID
+	Sort      field.Int    // 排序值，值越大越靠前，默认0
+	CreatedAt field.Time   // 创建时间
+	UpdatedAt field.Time   // 更新时间
 
 	fieldMap map[string]field.Expr
 }
@@ -72,7 +72,7 @@ func (c *category) updateTableName(table string) *category {
 	c.ID = field.NewInt64(table, "id")
 	c.Name = field.NewString(table, "name")
 	c.Title = field.NewString(table, "title")
-	c.Description = field.NewString(table, "description")
+	c.DocSort = field.NewString(table, "doc_sort")
 	c.Pid = field.NewInt64(table, "pid")
 	c.Sort = field.NewInt(table, "sort")
 	c.CreatedAt = field.NewTime(table, "created_at")
@@ -97,7 +97,7 @@ func (c *category) fillFieldMap() {
 	c.fieldMap["id"] = c.ID
 	c.fieldMap["name"] = c.Name
 	c.fieldMap["title"] = c.Title
-	c.fieldMap["description"] = c.Description
+	c.fieldMap["doc_sort"] = c.DocSort
 	c.fieldMap["pid"] = c.Pid
 	c.fieldMap["sort"] = c.Sort
 	c.fieldMap["created_at"] = c.CreatedAt

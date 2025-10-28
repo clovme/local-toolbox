@@ -166,7 +166,7 @@ function onDown (item: CategoryVO) {
 
 <template>
   <div class="vxe-menu--item-wrapper" :class="{['vxe-menu--item-level' + level]: true, 'is--expand': arrow.isExpand, 'is--exact-active': route.query.cid===`${navList.id}`, 'is--active': isActive}">
-    <router-link :to="{name: 'Article', query: {cid: navList.id, type: navList.name}}" class="vxe-menu--item-link">
+    <router-link :to="{name: 'Article', query: {cid: navList.id, type: navList.name, sort: navList.docSort}}" class="vxe-menu--item-link">
       <div :class="{'vxe-menu--item-link-icon': true, 'vxe-menu--item-link-icon--is-option': navList.name !== 'all' && navList.name !== 'default' }">
         <vxe-icon name="file-markdown"></vxe-icon>
         <vxe-icon name="information"></vxe-icon>

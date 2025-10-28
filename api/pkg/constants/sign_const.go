@@ -3,6 +3,8 @@
 
 package constants
 
+import "time"
+
 const (
 	ProjectName = "toolbox" // 项目名称
 	WebTitle    = "本地系统工具箱"
@@ -17,4 +19,5 @@ const (
 var (
 	DataPath   = "."
 	UploadPath = "upload"
+	RunTime    = time.Now()
 )

@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 	"toolbox/internal/cmd"
+	"toolbox/pkg/constants"
 	"toolbox/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,7 @@ func init() {
 	gin.DefaultWriter = io.Discard
 	// 初始化雪花算法节点
 	utils.InitSnowflake(1)
+	constants.RunTime = time.Now()
 }
 
 func main() {

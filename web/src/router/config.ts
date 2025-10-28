@@ -30,6 +30,17 @@ export const routeConfigs: Array<RouteRecordRaw> = [
         }
       },
       {
+        path: 'novel',
+        name: 'Novel',
+        component: () => import('../views/novel/Index.vue'),
+        meta: {
+          icon: 'novel',
+          title: '小说稿费计算',
+          isHome: true,
+          homeTitle: '小说稿费计算'
+        }
+      },
+      {
         path: 'preview',
         name: 'Preview',
         component: () => import('../views/article/ArticlePreview.vue'),

@@ -14,7 +14,7 @@ const router = useRouter()
 const isAdd = ref(false)
 const showPopup = ref(false)
 const showWinTitle = ref('添加文档分类')
-const formData = ref<CategoryAddVO>({ description: '', id: '', pid: '', sort: 0, title: '' })
+const formData = ref<CategoryAddVO>({ docSort: '', id: '', pid: '', sort: 0, title: '' })
 
 const defaultCategoryId = ref<string>('')
 const treeConfig: VxeTreeSelectPropTypes.TreeConfig = {
@@ -29,8 +29,10 @@ const submitEvent: VxeFormEvents.Submit = () => {
   postCategory(isAdd.value, formData.value).then((res) => {
     showPopup.value = false
     VxeUI.modal.message({ content: res.message, status: 'success' })
-    useArticle.setTreeList()
-    useArticle.setCategory(route.query, router)
+    if (route.query.sort !== formData.value.docSort) {
+      router.push({ name: 'Article', query: { cid: route.query.cid, type: route.query.type, sort: formData.value.docSort } })
+    }
+    useArticle.fetchCategoryTreeList(route.query, router)
   })
 }
 
@@ -43,6 +45,7 @@ function onAdd (item: CategoryVO) {
   formData.value.id = '0'
   formData.value.pid = (item.name !== 'all' && item.name !== 'default') ? item.id : '0'
   formData.value.sort = 0
+  formData.value.docSort = 'updatedAt'
   showWinTitle.value = '添加文档分类'
   showPopup.value = true
 }
@@ -53,7 +56,7 @@ function onEdit (item: CategoryVO) {
   formData.value.pid = item.pid
   formData.value.title = item.title
   formData.value.sort = item.sort
-  formData.value.description = item.description
+  formData.value.docSort = item.docSort
   showWinTitle.value = `编辑[${item.title}]分类信息`
   showPopup.value = true
 }
@@ -87,8 +90,7 @@ function onDelete (item: CategoryVO) {
       } else {
         router.push({ name: 'Article', query: { cid: item.pid, type: item.name } })
       }
-      useArticle.setTreeList()
-      useArticle.setCategory(route.query, router)
+      useArticle.fetchCategoryTreeList(route.query, router)
     })
   })
 }
@@ -103,11 +105,13 @@ const beforeHideMethod: VxeModalPropTypes.BeforeHideMethod = () => {
 const formRules = reactive<VxeFormPropTypes.Rules>({
   title: [
     { required: true, content: '分类名称不能为空' }
+  ],
+  docSort: [
+    { required: true, content: '必须选择文档排序' }
   ]
 })
 
-useArticle.setTreeList()
-useArticle.setCategory(route.query, router)
+useArticle.fetchCategoryTreeList(route.query, router)
 </script>
 
 <template>
@@ -127,17 +131,21 @@ useArticle.setCategory(route.query, router)
         </vxe-form-item>
         <vxe-form-item title="节点属于" field="pid" span="24" :item-render="{}">
           <template #default>
-            <vxe-tree-select v-model="formData.pid" :tree-config="treeConfig" :options="useArticle.treeList" :option-props="{label: 'title', value: 'id'}"></vxe-tree-select>
+            <vxe-tree-select v-model="formData.pid" :tree-config="treeConfig" :options="useArticle.rootTreeList" :option-props="{label: 'title', value: 'id'}"></vxe-tree-select>
           </template>
         </vxe-form-item>
-        <vxe-form-item title="排序" field="sort" span="24" :item-render="{}">
+        <vxe-form-item title="文档排序" field="docSort" span="24" :item-render="{}">
+          <template #default>
+            <vxe-radio-group v-model="formData.docSort">
+              <vxe-radio checked-value="title" content="标题[升序]"></vxe-radio>
+              <vxe-radio checked-value="updatedAt" content="更新时间[降序]"></vxe-radio>
+              <vxe-radio checked-value="createdAt" content="创建时间[降序]"></vxe-radio>
+            </vxe-radio-group>
+          </template>
+        </vxe-form-item>
+        <vxe-form-item title="菜单排序" field="sort" span="24" :item-render="{}">
           <template #default>
             <vxe-number-input placeholder="排序" show-word-count type="number" v-model="formData.sort"></vxe-number-input>
-          </template>
-        </vxe-form-item>
-        <vxe-form-item title="简介" field="description" span="24" :item-render="{}">
-          <template #default>
-            <vxe-textarea placeholder="请输入分类简介" show-word-count max-length="200" rows="5" v-model="formData.description"></vxe-textarea>
           </template>
         </vxe-form-item>
         <vxe-form-item className="article-add-submit-form" align="right" span="24">

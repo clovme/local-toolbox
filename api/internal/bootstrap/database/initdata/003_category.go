@@ -9,8 +9,8 @@ func (r *InitData) Category() {
 	m := r.Q.Category
 
 	modelList := []models.Category{
-		{Pid: 0, Title: "全部文章", Name: "all", Description: "全部文章", Sort: 0},
-		{Pid: 0, Title: "默认分类", Name: "default", Description: "默认分类", Sort: 1},
+		{Pid: 0, Title: "全部文章", Name: "all", DocSort: "updatedAt", Sort: 0},
+		{Pid: 0, Title: "默认分类", Name: "default", DocSort: "updatedAt", Sort: 1},
 	}
 
 	newModelList := insertIfNotExist[models.Category](modelList, func(model models.Category) (*models.Category, error) {

@@ -2,7 +2,7 @@
 import { optionArticle } from '@/api/article'
 import { useRoute, useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
-import { MdPreview, MdCatalog } from 'md-editor-v3'
+import { MdPreview, MdCatalog, MdHeadingId } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
 import { ArticleListVO } from '@/api/user'
 import { formatTime, timeAgo } from '@/utils'
@@ -14,6 +14,9 @@ const route = useRoute()
 const router = useRouter()
 const useArticle = useArticleStore()
 const id = 'preview-only'
+const mdHeadingId: MdHeadingId = ({ index }) => {
+  return `preview-only-${index}`
+}
 
 const scrollElement = ref<HTMLElement | null>(null)
 
@@ -41,7 +44,7 @@ const onDeleteArticle = (item: ArticleListVO) => {
     })
   })
 }
-useArticle.setArticleInfo(route.query)
+useArticle.fetchArticleInfo(route.query)
 </script>
 
 <template>
@@ -74,7 +77,12 @@ useArticle.setArticleInfo(route.query)
     <aside class="article-preview-catalog-box">
       <div class="article-preview-catalog">
         <!-- ✅ scrollElement 绑定预览容器 -->
-        <MdCatalog :editorId="id" :scrollElement="scrollElement as HTMLElement" />
+        <MdCatalog
+            :editorId="id"
+            theme="light"
+            :mdHeadingId=mdHeadingId
+            :catalogMaxDepth="3"
+        />
       </div>
     </aside>
   </div>

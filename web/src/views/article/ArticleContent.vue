@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArticleListVO, CategoryVO } from '@/api/user'
-import { buildCategoryTree, timeAgo } from '@/utils'
-import { getCategory, optionArticle } from '@/api/article'
+import { ArticleListVO } from '@/api/user'
+import { timeAgo } from '@/utils'
+import { optionArticle } from '@/api/article'
 import PageView from '@/views/layout/PageView.vue'
 import { VxeUI } from 'vxe-pc-ui'
 import { useArticleStore } from '@/store/article'
 
 const route = useRoute()
 const router = useRouter()
-const treeList = ref<CategoryVO[]>([])
 const useArticle = useArticleStore()
 const search = ref(route.query.kw as string)
 
@@ -31,33 +30,22 @@ const onDeleteArticle = (item: ArticleListVO) => {
         status: 'success'
       })
       search.value = route.query.kw as string
-      useArticle.setTreeList()
-      useArticle.setArticleList(route.query)
-      useArticle.setCategory(route.query, router)
+      useArticle.fetchCategoryTreeList(route.query, router)
+      useArticle.fetchArticleList(route.query)
     })
   })
 }
 
 watch(() => route.query, (query) => {
   search.value = query.kw as string
-  useArticle.setArticleList(query)
-})
-
-getCategory().then(rest => {
-  treeList.value = []
-  buildCategoryTree(rest.data).forEach((item) => {
-    if (item.name === 'all') {
-      return
-    }
-    treeList.value.push(item)
-  })
+  useArticle.fetchArticleList(query)
 })
 
 const onCreateArticle = () => {
   let id = route.query.cid
   let type = route.query.type
   if (route.query.type === 'all') {
-    for (const tree of treeList.value) {
+    for (const tree of useArticle.treeList) {
       if (tree.name === 'default') {
         id = tree.id
         type = tree.name
@@ -71,7 +59,7 @@ const onCreateArticle = () => {
 const onSearch = () => {
   router.push({ name: 'Article', query: { ...route.query, kw: search.value } })
 }
-useArticle.setArticleList(route.query)
+useArticle.fetchArticleList(route.query)
 </script>
 
 <template>
@@ -89,8 +77,8 @@ useArticle.setArticleList(route.query)
       <PageView class="article-content-list-content">
         <div class="article-content-list-item" v-for="item in useArticle.articleTags.articleList" :key="item.id">
           <div class="title-box">
-            <router-link v-if="route.query.type==='all'" class="title-category" :to="{name: 'Article', query: {cid: item.categoryID, type: item.categoryName}}">{{ item.categoryTitle }}</router-link>
-            <router-link class="title-content" :to="{name: 'Preview', query: {id: item.id, cid: item.categoryID, type: item.categoryName}}">{{ item.title }}</router-link>
+            <router-link v-if="route.query.type==='all'" class="title-category" :to="{name: 'Article', query: {cid: item.categoryID, type: item.categoryName, sort: item.docSort}}">{{ item.categoryTitle }}</router-link>
+            <router-link class="title-content" :to="{name: 'Preview', query: {id: item.id, cid: item.categoryID, type: item.categoryName, sort: item.docSort}}">{{ item.title }}</router-link>
           </div>
           <vxe-text-ellipsis class="summary" line-clamp="5" :content="item.summary"></vxe-text-ellipsis>
           <div class="options-time">

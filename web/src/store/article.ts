@@ -6,9 +6,10 @@ import { buildCategoryTree } from '@/utils'
 export const useArticleStore = defineStore('article', {
   state: () => {
     return {
-      treeList: [] as CategoryVO[],
+      treeList: [] as CategoryVO[], // 文章编辑树
+      rootTreeList: [] as CategoryVO[], // 分类树
       articleInfo: {} as ArticleListVO,
-      categoryList: [] as CategoryVO[],
+      categoryList: [] as CategoryVO[], // 分类导航ui
       articleTags: {
         tags: [] as string[],
         articleList: [] as ArticleListVO[]
@@ -18,13 +19,15 @@ export const useArticleStore = defineStore('article', {
   getters: {
   },
   actions: {
-    setTreeList () {
+    fetchCategoryTreeList (query, router) {
       const _this = this
-      _this.treeList = [{
+
+      _this.treeList = []
+      _this.rootTreeList = [{
         id: '0',
         title: '根节点',
         name: 'root',
-        description: '根节点',
+        docSort: 'updatedAt',
         articleCount: 0,
         pid: '0',
         sort: 0,
@@ -34,26 +37,27 @@ export const useArticleStore = defineStore('article', {
         children: []
       }]
       getCategory().then(rest => {
-        const categoryList = buildCategoryTree(rest.data)
-        categoryList.forEach((item) => {
+        _this.categoryList = buildCategoryTree(rest.data)
+        if (!query.cid || !query.type) {
+          const q = _this.categoryList[0]
+          router.push({ name: 'Article', query: { cid: q.id, type: q.name } })
+          return
+        }
+        _this.categoryList.forEach((item) => {
           if (item.name === 'all' || item.name === 'default') {
+            return
+          }
+          _this.rootTreeList.push(item)
+        })
+        _this.categoryList.forEach((item) => {
+          if (item.name === 'all') {
             return
           }
           _this.treeList.push(item)
         })
       })
     },
-    setCategory (query, router) {
-      const _this = this
-      getCategory().then(rest => {
-        _this.categoryList = buildCategoryTree(rest.data)
-        if (!query.cid || !query.type) {
-          const q = _this.categoryList[0]
-          router.push({ name: 'Article', query: { cid: q.id, type: q.name } })
-        }
-      })
-    },
-    setArticleList (query) {
+    fetchArticleList (query) {
       const _this = this
       getArticleList(query).then((res) => {
         _this.articleTags.tags = []
@@ -69,7 +73,7 @@ export const useArticleStore = defineStore('article', {
         }
       })
     },
-    setArticleInfo (query) {
+    fetchArticleInfo (query) {
       const _this = this
       getArticle(query).then((res) => {
         document.title = [res.data.title, window.WebTitle].join(' - ')

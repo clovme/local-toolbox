@@ -9,7 +9,7 @@ type ApiCategoryVO struct {
 	ID           string        `json:"id"`
 	Name         string        `json:"name"`
 	Title        string        `json:"title"`
-	Description  string        `json:"description"`
+	DocSort      string        `json:"docSort"`
 	ArticleCount int64         `json:"articleCount"`
 	Pid          string        `json:"pid"`
 	Sort         int           `json:"sort"`

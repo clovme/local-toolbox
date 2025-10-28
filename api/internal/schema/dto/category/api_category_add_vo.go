@@ -7,11 +7,11 @@ import (
 )
 
 type ApiCategoryAddDTO struct {
-	ID          *int64 `json:"id,string"`
-	Title       string `json:"title" binding:"required"`
-	Pid         *int64 `json:"pid,string"`
-	Sort        int    `json:"sort"`
-	Description string `json:"description"`
+	ID      *int64 `json:"id,string"`
+	Title   string `json:"title" binding:"required"`
+	Pid     *int64 `json:"pid,string"`
+	Sort    int    `json:"sort"`
+	DocSort string `json:"docSort"`
 }
 
 func (r ApiCategoryAddDTO) TranslateError(err error) map[string]string {

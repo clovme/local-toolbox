@@ -60,8 +60,17 @@ func (r *ApiArticleRepository) GetArticleList(c *core.Context) (data []articleVO
 		kw = fmt.Sprintf("%%%s%%", kw)
 		w = w.Where(a.Or(a.Title.Like(kw)).Or(a.Content.Like(kw)).Or(a.Tags.Like(kw)).Or(a.Summary.Like(kw)))
 	}
-	err = w.LeftJoin(r.Q.Category, r.Q.Category.ID.EqCol(a.CategoryID)).Order(a.UpdatedAt.Desc(), a.ID.Desc()).Scan(&data)
-	if err != nil {
+	w = w.LeftJoin(r.Q.Category, r.Q.Category.ID.EqCol(a.CategoryID))
+	if sort := c.Query("sort"); sort != "" && sort != "updatedAt" {
+		if sort == "title" {
+			w = w.Order(a.Title.Asc(), a.ID.Desc())
+		} else {
+			w = w.Order(a.CreatedAt.Desc(), a.ID.Desc())
+		}
+	} else {
+		w = w.Order(a.UpdatedAt.Desc(), a.ID.Desc())
+	}
+	if err = w.Scan(&data); err != nil {
 		return nil, err
 	}
 	return data, nil
@@ -87,14 +96,26 @@ func (r *ApiArticleRepository) AddArticle(dto articleDTO.ApiArticleDTO) (int64, 
 		return 0, errors.New(fmt.Sprintf("该分类，该文章[%s]已存在", dto.Title))
 	}
 
-	for _, s := range []string{",", "，", "/", "|"} {
-		dto.Tags = strings.ReplaceAll(dto.Tags, s, "、")
+	// 按逗号、顿号、斜杠、竖线拆分、空格
+	splitChars := []string{",", "，", "/", "|", " "}
+	for _, s := range splitChars {
+		dto.Tags = strings.ReplaceAll(dto.Tags, s, ",") // 先统一为逗号
 	}
+
+	var tags []string
+	for _, tag := range strings.Split(dto.Tags, ",") {
+		if tag == "" {
+			continue
+		}
+		tags = append(tags, strings.TrimSpace(tag))
+	}
+
+	dto.Tags = strings.Join(tags, "、")
 
 	m := &models.Article{
 		Title:      dto.Title,
 		CategoryID: *dto.CategoryID,
-		Tags:       dto.Tags,
+		Tags:       strings.ReplaceAll(dto.Tags, " ", ""),
 		Summary:    dto.Summary,
 		Content:    dto.Content,
 	}
