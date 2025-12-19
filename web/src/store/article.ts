@@ -40,7 +40,7 @@ export const useArticleStore = defineStore('article', {
         _this.categoryList = buildCategoryTree(rest.data)
         if (!query.cid || !query.type) {
           const q = _this.categoryList[0]
-          router.push({ name: 'Article', query: { cid: q.id, type: q.name } })
+          router.push({ name: 'Article', query: { cid: q.id, type: q.name, sort: q.docSort } })
           return
         }
         _this.categoryList.forEach((item) => {

@@ -53,7 +53,7 @@ const onCreateArticle = () => {
       }
     }
   }
-  router.push({ name: 'EditArticle', params: { type: 'add' }, query: { cid: id, type: type } })
+  router.push({ name: 'EditArticle', params: { type: 'add' }, query: { cid: id, type: type, sort: route.query.sort } })
 }
 
 const onSearch = () => {
@@ -83,12 +83,12 @@ useArticle.fetchArticleList(route.query)
           <vxe-text-ellipsis class="summary" line-clamp="5" :content="item.summary"></vxe-text-ellipsis>
           <div class="options-time">
             <div class="options-box">
-              <router-link class="options-box-edit" :to="{name: 'EditArticle', query: {id: item.id, cid: item.categoryID, type: item.categoryName}, params: {type: 'edit'}}">编辑</router-link>
+              <router-link class="options-box-edit" :to="{name: 'EditArticle', query: {id: item.id, cid: item.categoryID, type: item.categoryName, sort: item.docSort}, params: {type: 'edit'}}">编辑</router-link>
               <a @click="onDeleteArticle(item)" class="options-box-delete" href="javascript:void(0)">删除</a>
             </div>
             <div class="time">
-              <span>{{ timeAgo(item.createdAt) }}前发表</span>
-              <span>{{ timeAgo(item.updatedAt) }}前更新</span>
+              <span>{{ timeAgo(item.createdAt) }}发表</span>
+              <span>{{ timeAgo(item.updatedAt) }}更新</span>
             </div>
           </div>
         </div>

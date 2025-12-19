@@ -14,7 +14,7 @@ const router = useRouter()
 const isAdd = ref(false)
 const showPopup = ref(false)
 const showWinTitle = ref('添加文档分类')
-const formData = ref<CategoryAddVO>({ docSort: '', id: '', pid: '', sort: 0, title: '' })
+const formData = ref<CategoryAddVO>({ docSort: '', id: '', pid: '', sort: 0, title: '', isExpand: true })
 
 const defaultCategoryId = ref<string>('')
 const treeConfig: VxeTreeSelectPropTypes.TreeConfig = {
@@ -45,6 +45,7 @@ function onAdd (item: CategoryVO) {
   formData.value.id = '0'
   formData.value.pid = (item.name !== 'all' && item.name !== 'default') ? item.id : '0'
   formData.value.sort = 0
+  formData.value.isExpand = true
   formData.value.docSort = 'updatedAt'
   showWinTitle.value = '添加文档分类'
   showPopup.value = true
@@ -56,6 +57,7 @@ function onEdit (item: CategoryVO) {
   formData.value.pid = item.pid
   formData.value.title = item.title
   formData.value.sort = item.sort
+  formData.value.isExpand = item.isExpand
   formData.value.docSort = item.docSort
   showWinTitle.value = `编辑[${item.title}]分类信息`
   showPopup.value = true
@@ -120,9 +122,10 @@ useArticle.fetchCategoryTreeList(route.query, router)
       <div class="article-category-title"><vxe-icon name="file-word"></vxe-icon><span>文章分类列表</span></div>
       <ArticleNav @add="onAdd" @edit="onEdit" @delete="onDelete" v-model="useArticle.categoryList" />
     </PageView>
+
     <ArticleContent />
 
-    <vxe-modal :before-hide-method="beforeHideMethod" :title="showWinTitle" v-model="showPopup" :width="400" :draggable="false" lock-scroll :destroyOnClose="true">
+    <vxe-modal :before-hide-method="beforeHideMethod" :title="showWinTitle" v-model="showPopup" :width="400" lock-scroll :destroyOnClose="true">
       <vxe-form vertical title-colon title-bold className="article-add-form" ref="formRef" :rules="formRules" :data="formData" @submit="submitEvent" @reset="resetEvent">
         <vxe-form-item title="名称" field="title" span="24" :item-render="{}">
           <template #default>
@@ -140,6 +143,14 @@ useArticle.fetchCategoryTreeList(route.query, router)
               <vxe-radio checked-value="title" content="标题[升序]"></vxe-radio>
               <vxe-radio checked-value="updatedAt" content="更新时间[降序]"></vxe-radio>
               <vxe-radio checked-value="createdAt" content="创建时间[降序]"></vxe-radio>
+            </vxe-radio-group>
+          </template>
+        </vxe-form-item>
+        <vxe-form-item title="子节点展开模式" field="isExpand" span="24" :item-render="{}">
+          <template #default>
+            <vxe-radio-group v-model="formData.isExpand">
+              <vxe-radio :checkedValue="true" content="展开(默认)"></vxe-radio>
+              <vxe-radio :checkedValue="false" content="收缩"></vxe-radio>
             </vxe-radio-group>
           </template>
         </vxe-form-item>
@@ -171,6 +182,11 @@ useArticle.fetchCategoryTreeList(route.query, router)
     :deep(.vxe-form--item-title) {
       height: unset;
       line-height: unset;
+      user-select: none;
+    }
+
+    :deep(.vxe-radio--label) {
+      user-select: none;
     }
   }
 

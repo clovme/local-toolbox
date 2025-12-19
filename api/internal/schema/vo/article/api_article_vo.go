@@ -7,6 +7,7 @@ import (
 type ApiArticleVO struct {
 	ID            string     `json:"id"`
 	Title         string     `json:"title"`
+	DocSort       string     `json:"docSort"`
 	CategoryID    string     `json:"categoryID"`
 	CategoryTitle string     `json:"categoryTitle"`
 	CategoryName  string     `json:"categoryName"`

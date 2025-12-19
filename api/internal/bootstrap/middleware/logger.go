@@ -1,10 +1,10 @@
 package middleware
 
 import (
+	"gen_gin_tpl/pkg/constants"
+	httpLog "gen_gin_tpl/pkg/logger/http"
 	"strings"
 	"time"
-	"toolbox/pkg/constants"
-	httpLog "toolbox/pkg/logger/http"
 
 	"github.com/gin-gonic/gin"
 )

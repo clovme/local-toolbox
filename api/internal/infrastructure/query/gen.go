@@ -16,54 +16,79 @@ import (
 )
 
 var (
-	Q          = new(Query)
-	Article    *article
-	Category   *category
-	DNSTable   *dNSTable
-	FileRecord *fileRecord
-	Home       *home
+	Q              = new(Query)
+	Config         *config
+	CorsWhitelist  *corsWhitelist
+	Enums          *enums
+	Permission     *permission
+	Role           *role
+	RoleGroup      *roleGroup
+	RolePermission *rolePermission
+	Token          *token
+	User           *user
+	UserRole       *userRole
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
-	Article = &Q.Article
-	Category = &Q.Category
-	DNSTable = &Q.DNSTable
-	FileRecord = &Q.FileRecord
-	Home = &Q.Home
+	Config = &Q.Config
+	CorsWhitelist = &Q.CorsWhitelist
+	Enums = &Q.Enums
+	Permission = &Q.Permission
+	Role = &Q.Role
+	RoleGroup = &Q.RoleGroup
+	RolePermission = &Q.RolePermission
+	Token = &Q.Token
+	User = &Q.User
+	UserRole = &Q.UserRole
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:         db,
-		Article:    newArticle(db, opts...),
-		Category:   newCategory(db, opts...),
-		DNSTable:   newDNSTable(db, opts...),
-		FileRecord: newFileRecord(db, opts...),
-		Home:       newHome(db, opts...),
+		db:             db,
+		Config:         newConfig(db, opts...),
+		CorsWhitelist:  newCorsWhitelist(db, opts...),
+		Enums:          newEnums(db, opts...),
+		Permission:     newPermission(db, opts...),
+		Role:           newRole(db, opts...),
+		RoleGroup:      newRoleGroup(db, opts...),
+		RolePermission: newRolePermission(db, opts...),
+		Token:          newToken(db, opts...),
+		User:           newUser(db, opts...),
+		UserRole:       newUserRole(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Article    article
-	Category   category
-	DNSTable   dNSTable
-	FileRecord fileRecord
-	Home       home
+	Config         config
+	CorsWhitelist  corsWhitelist
+	Enums          enums
+	Permission     permission
+	Role           role
+	RoleGroup      roleGroup
+	RolePermission rolePermission
+	Token          token
+	User           user
+	UserRole       userRole
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Article:    q.Article.clone(db),
-		Category:   q.Category.clone(db),
-		DNSTable:   q.DNSTable.clone(db),
-		FileRecord: q.FileRecord.clone(db),
-		Home:       q.Home.clone(db),
+		db:             db,
+		Config:         q.Config.clone(db),
+		CorsWhitelist:  q.CorsWhitelist.clone(db),
+		Enums:          q.Enums.clone(db),
+		Permission:     q.Permission.clone(db),
+		Role:           q.Role.clone(db),
+		RoleGroup:      q.RoleGroup.clone(db),
+		RolePermission: q.RolePermission.clone(db),
+		Token:          q.Token.clone(db),
+		User:           q.User.clone(db),
+		UserRole:       q.UserRole.clone(db),
 	}
 }
 
@@ -77,30 +102,45 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Article:    q.Article.replaceDB(db),
-		Category:   q.Category.replaceDB(db),
-		DNSTable:   q.DNSTable.replaceDB(db),
-		FileRecord: q.FileRecord.replaceDB(db),
-		Home:       q.Home.replaceDB(db),
+		db:             db,
+		Config:         q.Config.replaceDB(db),
+		CorsWhitelist:  q.CorsWhitelist.replaceDB(db),
+		Enums:          q.Enums.replaceDB(db),
+		Permission:     q.Permission.replaceDB(db),
+		Role:           q.Role.replaceDB(db),
+		RoleGroup:      q.RoleGroup.replaceDB(db),
+		RolePermission: q.RolePermission.replaceDB(db),
+		Token:          q.Token.replaceDB(db),
+		User:           q.User.replaceDB(db),
+		UserRole:       q.UserRole.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Article    *articleDo
-	Category   *categoryDo
-	DNSTable   *dNSTableDo
-	FileRecord *fileRecordDo
-	Home       *homeDo
+	Config         *configDo
+	CorsWhitelist  *corsWhitelistDo
+	Enums          *enumsDo
+	Permission     *permissionDo
+	Role           *roleDo
+	RoleGroup      *roleGroupDo
+	RolePermission *rolePermissionDo
+	Token          *tokenDo
+	User           *userDo
+	UserRole       *userRoleDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Article:    q.Article.WithContext(ctx),
-		Category:   q.Category.WithContext(ctx),
-		DNSTable:   q.DNSTable.WithContext(ctx),
-		FileRecord: q.FileRecord.WithContext(ctx),
-		Home:       q.Home.WithContext(ctx),
+		Config:         q.Config.WithContext(ctx),
+		CorsWhitelist:  q.CorsWhitelist.WithContext(ctx),
+		Enums:          q.Enums.WithContext(ctx),
+		Permission:     q.Permission.WithContext(ctx),
+		Role:           q.Role.WithContext(ctx),
+		RoleGroup:      q.RoleGroup.WithContext(ctx),
+		RolePermission: q.RolePermission.WithContext(ctx),
+		Token:          q.Token.WithContext(ctx),
+		User:           q.User.WithContext(ctx),
+		UserRole:       q.UserRole.WithContext(ctx),
 	}
 }
 

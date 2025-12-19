@@ -22,7 +22,6 @@ appStore.setEnums()
 
 onMounted(() => {
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-  updateTheme(mediaQuery)
   mediaQuery.addEventListener('change', updateTheme)
 })
 </script>

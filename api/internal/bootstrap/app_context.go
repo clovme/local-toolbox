@@ -5,54 +5,34 @@
 package bootstrap
 
 import (
-	apiArticleRepository "toolbox/internal/infrastructure/persistence"
-	apiArticleService "toolbox/internal/application/article"
-	apiArticleHandler "toolbox/internal/interfaces/api"
+	apiPublicRepository "gen_gin_tpl/internal/infrastructure/persistence"
+	apiPublicService "gen_gin_tpl/internal/application/public"
+	apiPublicHandler "gen_gin_tpl/internal/interfaces/api"
 
-	apiCategoryRepository "toolbox/internal/infrastructure/persistence"
-	apiCategoryService "toolbox/internal/application/category"
-	apiCategoryHandler "toolbox/internal/interfaces/api"
+	webViewsRepository "gen_gin_tpl/internal/infrastructure/persistence"
+	webViewsService "gen_gin_tpl/internal/application/views"
+	webViewsHandler "gen_gin_tpl/internal/interfaces/web"
 
-	apiHomeRepository "toolbox/internal/infrastructure/persistence"
-	apiHomeService "toolbox/internal/application/home"
-	apiHomeHandler "toolbox/internal/interfaces/api"
-
-	webDnsRepository "toolbox/internal/infrastructure/persistence"
-	webDnsService "toolbox/internal/application/dns"
-	webDnsHandler "toolbox/internal/interfaces/web"
-
-	"toolbox/internal/infrastructure/query"
+	"gen_gin_tpl/internal/infrastructure/query"
 	"gorm.io/gorm"
 )
 
 type appContext struct {
-	ApiArticleHandler *apiArticleHandler.ArticleHandler
-	ApiCategoryHandler *apiCategoryHandler.CategoryHandler
-	ApiHomeHandler *apiHomeHandler.HomeHandler
-	WebDnsHandler *webDnsHandler.DnsHandler
+	ApiPublicHandler *apiPublicHandler.PublicHandler
+	WebViewsHandler *webViewsHandler.ViewsHandler
 }
 
 func NewAppContext(db *gorm.DB) *appContext {
-	apiArticleRepo := &apiArticleRepository.ApiArticleRepository{DB: db, Q: query.Q}
-	apiArticleService := &apiArticleService.ApiArticleService{Repo: apiArticleRepo}
-	apiArticleHandler := &apiArticleHandler.ArticleHandler{Service: apiArticleService}
+	apiPublicRepo := &apiPublicRepository.ApiPublicRepository{DB: db, Q: query.Q}
+	apiPublicService := &apiPublicService.ApiPublicService{Repo: apiPublicRepo}
+	apiPublicHandler := &apiPublicHandler.PublicHandler{Service: apiPublicService}
 
-	apiCategoryRepo := &apiCategoryRepository.ApiCategoryRepository{DB: db, Q: query.Q}
-	apiCategoryService := &apiCategoryService.ApiCategoryService{Repo: apiCategoryRepo}
-	apiCategoryHandler := &apiCategoryHandler.CategoryHandler{Service: apiCategoryService}
-
-	apiHomeRepo := &apiHomeRepository.ApiHomeRepository{DB: db, Q: query.Q}
-	apiHomeService := &apiHomeService.ApiHomeService{Repo: apiHomeRepo}
-	apiHomeHandler := &apiHomeHandler.HomeHandler{Service: apiHomeService}
-
-	webDnsRepo := &webDnsRepository.WebDnsRepository{DB: db, Q: query.Q}
-	webDnsService := &webDnsService.WebDnsService{Repo: webDnsRepo}
-	webDnsHandler := &webDnsHandler.DnsHandler{Service: webDnsService}
+	webViewsRepo := &webViewsRepository.WebViewsRepository{DB: db, Q: query.Q}
+	webViewsService := &webViewsService.WebViewsService{Repo: webViewsRepo}
+	webViewsHandler := &webViewsHandler.ViewsHandler{Service: webViewsService}
 
 	return &appContext{
-		ApiArticleHandler: apiArticleHandler,
-		ApiCategoryHandler: apiCategoryHandler,
-		ApiHomeHandler: apiHomeHandler,
-		WebDnsHandler: webDnsHandler,
+		ApiPublicHandler: apiPublicHandler,
+		WebViewsHandler: webViewsHandler,
 	}
 }

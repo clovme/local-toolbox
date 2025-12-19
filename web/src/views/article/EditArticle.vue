@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CryptoJS from 'crypto-js'
-import { ref, onMounted, reactive, watch, computed } from 'vue'
+import { ref, onMounted, reactive, watch } from 'vue'
 import { config, PreviewThemes, Themes, ToolbarNames, MdEditor } from 'md-editor-v3'
 
 import type { CompletionSource } from '@codemirror/autocomplete'
@@ -193,7 +193,7 @@ onMounted(() => {
 })
 
 const backArticle = () => {
-  router.push({ name: 'Article', query: { cid: route.query.cid, type: route.query.type } })
+  router.push({ name: 'Article', query: { cid: route.query.cid, type: route.query.type, sort: route.query.sort } })
 }
 
 const onSave = () => {
@@ -237,7 +237,7 @@ useArticle.fetchCategoryTreeList(route.query, router)
   <div>
     <MdEditor
         :theme="theme"
-        ref=editorRef
+        ref="editorRef"
         v-model="formData.content"
         id="md-editor-id"
         codeTheme="github"
@@ -245,6 +245,7 @@ useArticle.fetchCategoryTreeList(route.query, router)
         :previewTheme="previewTheme"
         placeholder="请输入文章内容"
         :autoFocus="true"
+        :noPrettier="true"
         :autoDetectCode="true"
         :pageFullscreen="false"
         :showToolbarName="false"
@@ -262,7 +263,7 @@ useArticle.fetchCategoryTreeList(route.query, router)
       </template>
     </MdEditor>
 
-    <vxe-modal :title="modelTitle" v-model="showPopup" :width="650" :height="450" :draggable="false" lock-scroll>
+    <vxe-modal :title="modelTitle" v-model="showPopup" :width="650" :height="450" lock-scroll>
       <vxe-form className="md-edit-form" ref="formRef" :rules="formRules" :data="formData" @submit="submitEvent" @reset="resetEvent">
         <vxe-form-item title="标题" field="title" span="24" :item-render="{}">
           <template #default>
@@ -285,7 +286,6 @@ useArticle.fetchCategoryTreeList(route.query, router)
           </template>
         </vxe-form-item>
         <vxe-form-item className="md-edit-submit-form" align="right" span="24">
-          <vxe-button status="error" content="使用 AI 总结"></vxe-button>
           <vxe-button type="submit" status="primary" content="保存内容"></vxe-button>
           <vxe-button type="reset" content="重置表单"></vxe-button>
         </vxe-form-item>

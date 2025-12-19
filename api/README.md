@@ -1,4 +1,4 @@
-# local_dns_proxy API
+# gen_gin_tpl API
 
 ## 编译工具
 ```shell

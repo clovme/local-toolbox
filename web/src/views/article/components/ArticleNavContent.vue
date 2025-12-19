@@ -19,10 +19,6 @@ const emit = defineEmits<{(e: 'add', item: CategoryVO): void
 }>()
 
 const route = useRoute()
-const arrow = ref({
-  icon: true,
-  isExpand: true
-})
 const level = computed(() => props.level ?? 1)
 
 // 判断当前节点或者子节点是否 active
@@ -45,9 +41,8 @@ function checkActive (node: CategoryVO): boolean {
   return false
 }
 
-function collapse () {
-  arrow.value.icon = !arrow.value.icon
-  arrow.value.isExpand = !arrow.value.isExpand
+function collapse (node: CategoryVO) {
+  node.isExpand = !node.isExpand
 }
 
 const menuItemOption = ref<HTMLUListElement | null>(null)
@@ -165,7 +160,7 @@ function onDown (item: CategoryVO) {
 </script>
 
 <template>
-  <div class="vxe-menu--item-wrapper" :class="{['vxe-menu--item-level' + level]: true, 'is--expand': arrow.isExpand, 'is--exact-active': route.query.cid===`${navList.id}`, 'is--active': isActive}">
+  <div class="vxe-menu--item-wrapper" :class="{['vxe-menu--item-level' + level]: true, 'is--expand': navList.isExpand, 'is--exact-active': route.query.cid===`${navList.id}`, 'is--active': isActive}">
     <router-link :to="{name: 'Article', query: {cid: navList.id, type: navList.name, sort: navList.docSort}}" class="vxe-menu--item-link">
       <div :class="{'vxe-menu--item-link-icon': true, 'vxe-menu--item-link-icon--is-option': navList.name !== 'all' && navList.name !== 'default' }">
         <vxe-icon name="file-markdown"></vxe-icon>
@@ -180,8 +175,8 @@ function onDown (item: CategoryVO) {
           </div>
         </div>
       </div>
-      <div v-if="navList.children?.length" class="vxe-menu--item-link-collapse" @click.stop.prevent="collapse">
-        <vxe-icon v-if="arrow.icon" name="arrow-down"></vxe-icon>
+      <div v-if="navList.children?.length" class="vxe-menu--item-link-collapse" @click.stop.prevent="collapse(navList)">
+        <vxe-icon v-if="navList.isExpand" name="arrow-down"></vxe-icon>
         <vxe-icon v-else name="arrow-left"></vxe-icon>
       </div>
     </router-link>

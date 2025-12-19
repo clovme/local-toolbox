@@ -49,6 +49,7 @@ export interface CategoryVO {
   pid: string
   sort: number
   status: number
+  isExpand: boolean
   createdAt: string
   updatedAt: string
   children?: CategoryVO[]
@@ -60,6 +61,7 @@ export interface CategoryAddVO {
   pid: string
   sort: number
   docSort: string
+  isExpand: boolean
 }
 
 export interface ArticleListVO {

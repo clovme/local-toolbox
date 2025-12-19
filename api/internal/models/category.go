@@ -14,6 +14,7 @@ type Category struct {
 	Title     string     `gorm:"type:varchar(50);comment:分类名称(中文)"`
 	DocSort   string     `gorm:"type:varchar(15);default:updatedAt;comment:排序字段"`
 	Pid       int64      `gorm:"type:bigint;comment:父ID"`
+	IsExpand  bool       `gorm:"default:0;comment:展开"`
 	Sort      int        `gorm:"type:int;default:0;comment:排序值，值越大越靠前，默认0"`
 	CreatedAt *time.Time `gorm:"autoCreateTime:nano;comment:创建时间"`
 	UpdatedAt *time.Time `gorm:"autoUpdateTime:nano;comment:更新时间"`

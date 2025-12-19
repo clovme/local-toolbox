@@ -30,7 +30,7 @@ func CorsMiddleware() gin.HandlerFunc {
 		// 设置允许的 HTTP 请求方法
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		// 设置允许的 HTTP 请求头
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Token, Origin, Content-Type, Content-Length, Accept-Encoding, Accept")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Authorization, Browser-Type, Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Accept, X-Requested-With")
 		// 允许请求携带凭证（如 Cookie、HTTP 认证信息等）
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		// 设置浏览器可以缓存预检请求响应的最长时间（秒）

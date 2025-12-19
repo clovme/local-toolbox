@@ -114,11 +114,12 @@ func (r *ApiCategoryRepository) AddCategory(dto category.ApiCategoryAddDTO) erro
 	}
 
 	cm := models.Category{
-		Name:    "custom",
-		Title:   dto.Title,
-		Pid:     *dto.Pid,
-		DocSort: dto.DocSort,
-		Sort:    dto.Sort,
+		Name:     "custom",
+		Title:    dto.Title,
+		Pid:      *dto.Pid,
+		IsExpand: dto.IsExpand,
+		DocSort:  dto.DocSort,
+		Sort:     dto.Sort,
 	}
 
 	if err := c.Create(&cm); err != nil {
@@ -158,7 +159,7 @@ func (r *ApiCategoryRepository) UpdateCategory(dto category.ApiCategoryAddDTO) e
 	}
 
 	// 3️⃣ 更新分类
-	info, err := c.Where(c.ID.Eq(*dto.ID)).UpdateSimple(c.Title.Value(dto.Title), c.Pid.Value(*dto.Pid), c.DocSort.Value(dto.DocSort), c.Sort.Value(dto.Sort))
+	info, err := c.Where(c.ID.Eq(*dto.ID)).UpdateSimple(c.Title.Value(dto.Title), c.Pid.Value(*dto.Pid), c.DocSort.Value(dto.DocSort), c.IsExpand.Value(dto.IsExpand), c.Sort.Value(dto.Sort))
 	if err != nil {
 		return err
 	}

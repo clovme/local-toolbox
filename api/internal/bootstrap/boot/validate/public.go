@@ -1,7 +1,10 @@
 package validate
 
 import (
+	"errors"
+	"gen_gin_tpl/internal/infrastructure/query"
 	"github.com/go-playground/validator/v10"
+	"gorm.io/gorm"
 	"net/mail"
 	"regexp"
 )
@@ -42,4 +45,32 @@ func PasswordValid(fl validator.FieldLevel) bool {
 	hasSpecial := regexp.MustCompile(`[^A-Za-z\d]`).MatchString(value)
 
 	return hasLetter && hasNumber && hasSpecial
+}
+
+// UniqueEmailValid 邮箱唯一校验器
+func UniqueEmailValid(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	if _, err := query.User.Where(query.User.Email.Eq(value)).First(); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return true
+		}
+		return false
+	}
+
+	return true
+}
+
+// UniqueUsernameValid 用户名唯一校验器
+func UniqueUsernameValid(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	if _, err := query.User.Where(query.User.Username.Eq(value)).First(); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return true
+		}
+		return false
+	}
+
+	return true
 }

@@ -2,9 +2,9 @@ package initdata
 
 import (
 	"errors"
+	"gen_gin_tpl/internal/core"
+	"gen_gin_tpl/internal/infrastructure/query"
 	"gorm.io/gorm"
-	"toolbox/internal/core"
-	"toolbox/internal/infrastructure/query"
 )
 
 type InitData struct {

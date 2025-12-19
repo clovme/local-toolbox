@@ -69,14 +69,14 @@ export function timeAgo (isoTime: string): string {
   if (diff < minute) {
     return '刚刚'
   } else if (diff < hour) {
-    return Math.floor(diff / minute) + '分钟'
+    return Math.floor(diff / minute) + '分钟前'
   } else if (diff < day) {
-    return Math.floor(diff / hour) + '小时'
+    return Math.floor(diff / hour) + '小时前'
   } else if (diff < month) {
-    return Math.floor(diff / day) + '天'
+    return Math.floor(diff / day) + '天前'
   } else if (diff < year) {
-    return Math.floor(diff / month) + '月'
+    return Math.floor(diff / month) + '月前'
   } else {
-    return Math.floor(diff / year) + '年'
+    return Math.floor(diff / year) + '年前'
   }
 }

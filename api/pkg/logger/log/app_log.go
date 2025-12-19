@@ -1,8 +1,8 @@
 package log
 
 import (
+	"gen_gin_tpl/pkg/logger"
 	"github.com/rs/zerolog"
-	"toolbox/pkg/logger"
 )
 
 // Debug 不同 level 封装

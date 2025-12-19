@@ -126,7 +126,7 @@ func InitLogger(cfg LoggerConfig) {
 
 			if cfg.FormatJSON {
 				// JSON 格式：直接复用 zerolog 默认 JSON 格式输出
-				writer = io.MultiWriter(consoleWriter, fileWriter)
+				writer = io.MultiWriter(consoleWriter, fileWriter, NewWebSocketWriter())
 			} else {
 				// ConsoleWriter 格式：也要给 file 和 WebSocket 同样的格式化输出
 				textWriter := zerolog.ConsoleWriter{
@@ -135,7 +135,7 @@ func InitLogger(cfg LoggerConfig) {
 					FormatTimestamp: formatTimestamp,
 					FormatLevel:     formatLevel,
 				}
-				writer = io.MultiWriter(consoleWriter, textWriter)
+				writer = io.MultiWriter(consoleWriter, textWriter, NewWebSocketWriter())
 			}
 
 			_callerSkipFrames := 2

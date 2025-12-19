@@ -10,12 +10,21 @@ export const routeConfigs: Array<RouteRecordRaw> = [
       {
         path: 'dns',
         name: 'DnsList',
-        component: () => import('../views/dns/DnsList.vue'),
+        component: () => import('../views/dns/Index.vue'),
         meta: {
           icon: 'dns',
-          title: '本地DNS管理',
-          isHome: true,
-          homeTitle: 'DNS管理'
+          title: 'DNS管理',
+          isShow: true
+        }
+      },
+      {
+        path: 'git',
+        name: 'GitManage',
+        component: () => import('../views/git/Index.vue'),
+        meta: {
+          icon: 'git',
+          title: 'Git 管理',
+          isShow: true
         }
       },
       {
@@ -25,8 +34,7 @@ export const routeConfigs: Array<RouteRecordRaw> = [
         meta: {
           icon: 'article',
           title: '文章管理',
-          isHome: true,
-          homeTitle: '文章管理'
+          isShow: true
         }
       },
       {
@@ -35,9 +43,8 @@ export const routeConfigs: Array<RouteRecordRaw> = [
         component: () => import('../views/novel/Index.vue'),
         meta: {
           icon: 'novel',
-          title: '小说稿费计算',
-          isHome: true,
-          homeTitle: '小说稿费计算'
+          title: '稿费计算',
+          isShow: true
         }
       },
       {
@@ -47,22 +54,10 @@ export const routeConfigs: Array<RouteRecordRaw> = [
         meta: {
           icon: 'article',
           title: '文章浏览',
-          isHome: false,
-          homeTitle: '文章浏览'
+          isShow: false
         }
       }
     ]
-  },
-  {
-    path: '/home',
-    name: 'Home',
-    component: () => import('../views/home/HomeView.vue'),
-    meta: {
-      icon: 'home',
-      title: '首页导航',
-      isHome: false,
-      homeTitle: '首页导航'
-    }
   },
   {
     path: '/article/:type',

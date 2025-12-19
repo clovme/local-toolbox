@@ -1,8 +1,8 @@
 package status
 
 import (
+	"gen_gin_tpl/pkg/enums"
 	"sort"
-	"toolbox/pkg/enums"
 )
 
 type Status int
@@ -16,8 +16,8 @@ const (
 
 var (
 	initiate = map[Status]enums.Enums{
-		Enable:  {Key: "enable", Name: "启用", Desc: "启用"},
-		Disable: {Key: "disable", Name: "禁用", Desc: "禁用"},
+		Enable:  {ID: 1000000000000000000, Key: "enable", Name: "启用", Desc: "启用"},
+		Disable: {ID: 1000000000000000001, Key: "disable", Name: "禁用", Desc: "禁用"},
 	}
 
 	enumToValue = make(map[string]Status)
@@ -29,29 +29,34 @@ func init() {
 	}
 }
 
+// ID 获取enums.ID
+func (c Status) ID() int64 {
+	return initiate[c].ID
+}
+
 // Key 获取enums.Key
-func (r Status) Key() string {
-	return initiate[r].Key
+func (c Status) Key() string {
+	return initiate[c].Key
 }
 
 // Name 获取枚举名称
-func (r Status) Name() string {
-	return initiate[r].Name
+func (c Status) Name() string {
+	return initiate[c].Name
 }
 
 // Desc 获取枚举描述
-func (r Status) Desc() string {
-	return initiate[r].Desc
+func (c Status) Desc() string {
+	return initiate[c].Desc
 }
 
 // Int 获取枚举值
-func (r Status) Int() int {
-	return int(r)
+func (c Status) Int() int {
+	return int(c)
 }
 
 // Is 比较枚举值
-func (r Status) Is(v Status) bool {
-	return v == r
+func (c Status) Is(v Status) bool {
+	return v == c
 }
 
 // Code 获取Status
@@ -62,8 +67,8 @@ func Code(key string) Status {
 	return Disable
 }
 
-// ValueList 获取所有枚举列表
-func ValueList() []Status {
+// Values 获取所有枚举
+func Values() []Status {
 	values := make([]Status, 0, len(initiate))
 	for k := range initiate {
 		values = append(values, k)
@@ -72,13 +77,4 @@ func ValueList() []Status {
 		return values[i] < values[j]
 	})
 	return values
-}
-
-// ValueMap 获取所有枚举Map（安全副本）
-func ValueMap() map[Status]enums.Enums {
-	copyMap := make(map[Status]enums.Enums, len(initiate))
-	for k, v := range initiate {
-		copyMap[k] = v
-	}
-	return copyMap
 }

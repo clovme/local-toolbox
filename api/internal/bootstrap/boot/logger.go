@@ -2,29 +2,27 @@ package boot
 
 import (
 	"fmt"
+	"gen_gin_tpl/pkg/cfg"
+	"gen_gin_tpl/pkg/logger"
+	"gen_gin_tpl/pkg/utils/file"
 	"os"
-	"toolbox/pkg/config"
-	"toolbox/pkg/constants"
-	"toolbox/pkg/logger"
-	"toolbox/pkg/utils/file"
 )
 
 // InitializationLogger 初始化日志
-func InitializationLogger() {
-	path, err := file.GetFileAbsPath(constants.DataPath, "logs")
+func InitializationLogger(c cfg.Logger) {
+	path, err := file.GetFileAbsPath(c.LogPath)
 	if err != nil {
 		fmt.Println("获取日志目录失败:", err)
 		os.Exit(-1)
 	}
 	// 初始化一次
-	cfg := config.GetConfig()
 	logger.InitLogger(logger.LoggerConfig{
 		Dir:        path,
-		MaxSize:    cfg.Logger.MaxSize,
-		MaxBackups: cfg.Logger.MaxBackups,
-		MaxAge:     cfg.Logger.MaxAge,
-		Compress:   true,
-		Level:      cfg.Logger.Level,
-		FormatJSON: false, // true=结构化；false=文本
+		MaxSize:    c.MaxSize,
+		MaxBackups: c.MaxBackups,
+		MaxAge:     c.MaxAge,
+		Compress:   c.Compress,
+		Level:      c.Level,
+		FormatJSON: c.FormatJSON, // true=结构化；false=文本
 	})
 }

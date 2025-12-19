@@ -32,6 +32,7 @@ func newCategory(db *gorm.DB, opts ...gen.DOOption) category {
 	_category.Title = field.NewString(tableName, "title")
 	_category.DocSort = field.NewString(tableName, "doc_sort")
 	_category.Pid = field.NewInt64(tableName, "pid")
+	_category.IsExpand = field.NewBool(tableName, "is_expand")
 	_category.Sort = field.NewInt(tableName, "sort")
 	_category.CreatedAt = field.NewTime(tableName, "created_at")
 	_category.UpdatedAt = field.NewTime(tableName, "updated_at")
@@ -50,6 +51,7 @@ type category struct {
 	Title     field.String // 分类名称(中文)
 	DocSort   field.String // 排序字段
 	Pid       field.Int64  // 父ID
+	IsExpand  field.Bool   // 展开
 	Sort      field.Int    // 排序值，值越大越靠前，默认0
 	CreatedAt field.Time   // 创建时间
 	UpdatedAt field.Time   // 更新时间
@@ -74,6 +76,7 @@ func (c *category) updateTableName(table string) *category {
 	c.Title = field.NewString(table, "title")
 	c.DocSort = field.NewString(table, "doc_sort")
 	c.Pid = field.NewInt64(table, "pid")
+	c.IsExpand = field.NewBool(table, "is_expand")
 	c.Sort = field.NewInt(table, "sort")
 	c.CreatedAt = field.NewTime(table, "created_at")
 	c.UpdatedAt = field.NewTime(table, "updated_at")
@@ -93,12 +96,13 @@ func (c *category) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *category) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 8)
+	c.fieldMap = make(map[string]field.Expr, 9)
 	c.fieldMap["id"] = c.ID
 	c.fieldMap["name"] = c.Name
 	c.fieldMap["title"] = c.Title
 	c.fieldMap["doc_sort"] = c.DocSort
 	c.fieldMap["pid"] = c.Pid
+	c.fieldMap["is_expand"] = c.IsExpand
 	c.fieldMap["sort"] = c.Sort
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt

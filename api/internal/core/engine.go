@@ -2,16 +2,21 @@ package core
 
 import (
 	"fmt"
-	"html/template"
-	"os"
-	"sort"
-	"toolbox/pkg/constants"
-	"toolbox/pkg/logger/log"
-	"toolbox/pkg/utils/file"
-	"toolbox/public"
-
+	"gen_gin_tpl/pkg/logger/log"
+	"gen_gin_tpl/pkg/utils/cert"
+	"gen_gin_tpl/pkg/utils/file"
+	"gen_gin_tpl/pkg/variable"
+	"gen_gin_tpl/public"
 	"github.com/gin-contrib/gzip"
+	"github.com/gin-contrib/sessions"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
+	"html/template"
+	"io/fs"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
 )
 
 // Engine 自定义gin.Engine
@@ -23,13 +28,35 @@ type Engine struct {
 // SetHTMLTemplate 设置模版
 //
 // 参数:
+//   - templatePath: 模版路径
 //   - funcMap: 模版函数
 //
 // 返回值:
 //   - *template.Template: 模版对象
-func (engine *Engine) SetHTMLTemplate() {
-	tmpl := template.Must(template.New("").ParseFS(public.WebFS, "web/*.html"))
-	engine.Engine.SetHTMLTemplate(tmpl)
+//
+// 说明:
+//   - 设置模版路径和函数，返回模版对象。
+//   - templatePath: 模版路径，例如: web/templates/views/index.html
+//     -------------------------- web/templates/admin/index.html
+//     -------------------------- web/templates/me/index.html
+//   - 使用的时候，传入 web/templates，会自动加载 web/templates 下的所有文件
+//   - handler 中使用模版,views/index.html
+//     ---------------- admin/index.html
+//     ---------------- me/index.html
+//     c.HTML("views/index.html", "首页", nil)
+func (engine *Engine) SetHTMLTemplate(templatePath string, funcMap template.FuncMap) {
+	if !strings.HasSuffix(templatePath, "/") {
+		templatePath += "/"
+	}
+	files, _ := fs.Glob(public.TemplatesFS, templatePath+"**/*.html")
+	tpl := template.New("templates").Funcs(funcMap)
+	for _, file_ := range files {
+		// 去掉 "templates/" 前缀，让模板名变得更简洁
+		content, _ := public.TemplatesFS.ReadFile(file_)
+		tplName := strings.TrimPrefix(file_, templatePath)
+		tpl = template.Must(tpl.New(tplName).Parse(string(content)))
+	}
+	engine.Engine.SetHTMLTemplate(tpl)
 }
 
 // Use 注册中间件
@@ -118,33 +145,35 @@ func (engine *Engine) Routes() []RoutesInfo {
 	return result
 }
 
-// Run 启动HTTPS服务
+// RunTLS 启动HTTPS服务
 //
 // 参数:
 //   - host: 主机名
 //   - port: 端口号
+//   - dataPath: 证书数据路径
 //
 // 返回值:
 //   - error: 错误信息
-func (engine *Engine) Run(ip string, port int) {
+func (engine *Engine) RunTLS(ip string, port int, dataPath string) {
 	engine.checkDuplicateRoutes()
+
+	path, err := file.GetFileAbsPath(dataPath)
+	if err != nil {
+		log.Error().Err(err).Msg("获取证书路径失败")
+		return
+	}
 
 	// 打印路由信息
 	for i, route := range engine.Routes() {
 		method := fmt.Sprintf("[%s]", route.Method)
 		hostAddr := fmt.Sprintf("%s:%d", ip, port)
-		log.Info().Msgf("%03d %-8s http://%s%-40s%-10s%-20s%s", i+1, method, hostAddr, route.Path, "-->", route.Name, route.Description)
+		log.Info().Msgf("%03d %-6s https://%s%-30s%-10s%-15s%s", i+1, method, hostAddr, route.Path, "-->", route.Name, route.Description)
 	}
+	log.Info().Msgf("程序所在路径 %s", filepath.ToSlash(filepath.Dir(path)))
 
-	absPath, err := file.GetFileAbsPath(".")
-	if err != nil {
-		return
-	}
-	log.Info().Msgf("数据所在路径：%s", constants.DataPath)
-	log.Info().Msgf("程序所在路径：%s", absPath)
-
+	crtPath, keyPath := cert.GetCertificatePath(path)
 	addr := fmt.Sprintf("%s:%d", ip, port) // ⚠️ 用IP，不要用Domain
-	if err := engine.Engine.Run(addr); err != nil {
+	if err := engine.Engine.RunTLS(addr, crtPath, keyPath); err != nil {
 		log.Error().Err(err).Msg("服务启动失败")
 		os.Exit(-1)
 	}
@@ -175,11 +204,23 @@ func (engine *Engine) checkDuplicateRoutes() {
 func New(opts ...gin.OptionFunc) *Engine {
 	routesInfo = make(map[string]RoutesInfo)
 
+	sessionStore := func() cookie.Store {
+		store := cookie.NewStore(variable.SessionKey)
+		store.Options(sessions.Options{
+			Path:     "/",
+			MaxAge:   0, // 3600 * 24 * 7, // 有效期 7 天
+			HttpOnly: true,
+			Secure:   false, // 本地调试 http 必须 false
+		})
+		return store
+	}()
+
 	// 创建 gin web 实例
 	engine := gin.New(opts...)
-	//engine.MaxMultipartMemory = 200 << 20 // (n << 20)MB
 	// 注册全局 gzip
 	engine.Use(gzip.Gzip(gzip.DefaultCompression))
+	// 注册 session 中间件
+	engine.Use(sessions.Sessions("session", sessionStore))
 
 	return &Engine{
 		Engine: engine,

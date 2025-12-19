@@ -11,7 +11,7 @@ const router = createRouter({
 router.beforeEach((to, __, next) => {
   NProgress.start()
   if (!to.name) {
-    next({ name: 'Home' }) // 没有路由名，跳到首页
+    next({ name: 'Article' }) // 没有路由名，跳到首页
   } else {
     next() // 有路由名，正常放行
   }

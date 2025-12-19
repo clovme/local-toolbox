@@ -3,21 +3,19 @@
 
 package constants
 
-import "time"
-
 const (
-	ProjectName = "toolbox" // 项目名称
-	WebTitle    = "本地系统工具箱"
+	ProjectName     = "gen_gin_tpl" // 项目名称
+	HeaderEncrypted = "X-Encrypted" // 加密标识, 用于标识请求是否加密
+	HttpLogKey      = "HTTP_LOG_KEY"
 
-	HttpLogKey = "HTTP_LOG_KEY"
-	LimitPage  = "LIMIT_PAGE"
+	WebTitle           = "WEB_TITLE"             // 站点标题标志
+	PublicPEM          = "PUBLIC_PEM"            // 公钥, 用于加密解密
+	Countdown          = "COUNTDOWN"             // 倒计时标记
+	PrivatePEM         = "PRIVATE_PEM"           // 私钥, 用于加密解密
+	SessionKey         = "SESSION_KEY"           // 会话密钥, 用于加密解密
+	ContextIsEncrypted = "IS_ENCRYPTED_RESPONSE" // 上下文是否加密的标识
 
-	DNSStop    = "stop"
-	DNSRunning = "running"
-)
-
-var (
-	DataPath   = "."
-	UploadPath = "upload"
-	RunTime    = time.Now()
+	IsContextAjax   = "IS_CONTEXT_AJAX"   // Ajax 请求标识
+	IsContextLogin  = "IS_CONTEXT_LOGIN"  // 用户登录状态标识
+	ContextUserInfo = "CONTEXT_USER_INFO" // 用户信息
 )

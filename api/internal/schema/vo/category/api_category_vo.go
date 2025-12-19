@@ -13,6 +13,7 @@ type ApiCategoryVO struct {
 	ArticleCount int64         `json:"articleCount"`
 	Pid          string        `json:"pid"`
 	Sort         int           `json:"sort"`
+	IsExpand     bool          `json:"isExpand"`
 	Status       status.Status `json:"status"`
 	CreatedAt    *time.Time    `json:"createdAt"`
 	UpdatedAt    *time.Time    `json:"updatedAt"`

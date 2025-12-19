@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"gen_gin_tpl/pkg/snowflake"
 	"github.com/rs/zerolog/log"
-	"toolbox/pkg/snowflake"
 )
 
 var node *snowflake.Node

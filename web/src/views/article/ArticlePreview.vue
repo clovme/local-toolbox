@@ -2,7 +2,7 @@
 import { optionArticle } from '@/api/article'
 import { useRoute, useRouter } from 'vue-router'
 import { ref, onMounted } from 'vue'
-import { MdPreview, MdCatalog, MdHeadingId } from 'md-editor-v3'
+import { MdEditor, PreviewThemes, Themes } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
 import { ArticleListVO } from '@/api/user'
 import { formatTime, timeAgo } from '@/utils'
@@ -13,15 +13,16 @@ import { useArticleStore } from '@/store/article'
 const route = useRoute()
 const router = useRouter()
 const useArticle = useArticleStore()
-const id = 'preview-only'
-const mdHeadingId: MdHeadingId = ({ index }) => {
-  return `preview-only-${index}`
-}
 
-const scrollElement = ref<HTMLElement | null>(null)
+const editorRef = ref<InstanceType<typeof MdEditor> | null>(null)
+const theme = ref<Themes>((localStorage.getItem('APP_THEME') || 'light') as Themes)
+const previewTheme = ref<PreviewThemes>('default')
 
 onMounted(() => {
-  scrollElement.value = document.documentElement
+  // @ts-ignore
+  editorRef.value?.togglePreviewOnly(true)
+  // @ts-ignore
+  editorRef.value?.toggleCatalog(true)
 })
 
 const onDeleteArticle = (item: ArticleListVO) => {
@@ -44,6 +45,14 @@ const onDeleteArticle = (item: ArticleListVO) => {
     })
   })
 }
+const copyEvent = (content: string) => {
+  if (VxeUI.clipboard.copy(content)) {
+    VxeUI.modal.message({
+      status: 'success',
+      content: '复制成功'
+    })
+  }
+}
 useArticle.fetchArticleInfo(route.query)
 </script>
 
@@ -52,15 +61,17 @@ useArticle.fetchArticleInfo(route.query)
     <aside class="article-preview-left-box">
       <div class="info-card">
         <h3>文章信息</h3>
-        <p class="meta">分类：<router-link class="title-category" :to="{ name: 'Article', query: { cid: useArticle.articleInfo.categoryID, type: useArticle.articleInfo.categoryName } }">{{ useArticle.articleInfo.categoryTitle }}</router-link></p>
-        <p class="meta tags">标签：<router-link :to="{ name: 'Article', query: { cid: useArticle.articleInfo.categoryID, type: useArticle.articleInfo.categoryName, kw: tag } }" v-for="(tag, index) in useArticle.articleInfo.tags?.split('、')" :key="index">{{ tag }}</router-link></p>
-        <p class="meta">发布时间：{{ formatTime(useArticle.articleInfo.createdAt) }}({{ timeAgo(useArticle.articleInfo.createdAt) }}前)</p>
-        <p class="meta">更新时间：{{ formatTime(useArticle.articleInfo.updatedAt) }}({{ timeAgo(useArticle.articleInfo.updatedAt) }}前)</p>
+        <p class="meta">分类：<router-link class="title-category" :to="{ name: 'Article', query: { cid: useArticle.articleInfo.categoryID, type: useArticle.articleInfo.categoryName, sort: useArticle.articleInfo.docSort } }">{{ useArticle.articleInfo.categoryTitle }}</router-link></p>
+        <p class="meta tags">标签：<router-link :to="{ name: 'Article', query: { cid: useArticle.articleInfo.categoryID, type: useArticle.articleInfo.categoryName, sort: useArticle.articleInfo.docSort, kw: tag } }" v-for="(tag, index) in useArticle.articleInfo.tags?.split('、')" :key="index">{{ tag }}</router-link></p>
+        <p class="meta">发布时间：{{ formatTime(useArticle.articleInfo.createdAt) }}({{ timeAgo(useArticle.articleInfo.createdAt) }})</p>
+        <p class="meta">更新时间：{{ formatTime(useArticle.articleInfo.updatedAt) }}({{ timeAgo(useArticle.articleInfo.updatedAt) }})</p>
         <p class="meta"></p>
-        <p class="meta options">
-          <router-link class="options-box-edit" :to="{name: 'EditArticle', query: {id: useArticle.articleInfo.id, cid: useArticle.articleInfo.categoryID, type: useArticle.articleInfo.categoryName}, params: {type: 'edit'}}">编辑</router-link>
+        <div class="meta options">
+          <router-link class="options-box-edit" :to="{name: 'EditArticle', query: {id: useArticle.articleInfo.id, cid: useArticle.articleInfo.categoryID, type: useArticle.articleInfo.categoryName, sort: useArticle.articleInfo.docSort}, params: {type: 'edit'}}">编辑</router-link>
           <a @click="onDeleteArticle(useArticle.articleInfo)" class="options-box-delete" href="javascript:void(0)">删除</a>
-        </p>
+          <div class="flex1"></div>
+          <a @click="copyEvent(useArticle.articleInfo.content)" class="options-box-delete" href="javascript:void(0)">点击复制</a>
+        </div>
       </div>
     </aside>
 
@@ -69,22 +80,21 @@ useArticle.fetchArticleInfo(route.query)
         <h1 class="title">{{ useArticle.articleInfo.title }}</h1>
         <div class="article-body">
           <!-- ✅ 加 ref -->
-          <MdPreview codeTheme="github" :codeFoldable="false" :noPrettier="true" :id="id" :modelValue="useArticle.articleInfo.content || ''" />
+          <MdEditor
+              :theme="theme"
+              ref="editorRef"
+              v-model="useArticle.articleInfo.content"
+              codeTheme="github"
+              catalogLayout="flat"
+              :previewTheme="previewTheme"
+              :readOnly="true"
+              :footers="[]"
+              :toolbars="[]">
+          </MdEditor>
         </div>
       </PageView>
     </main>
 
-    <aside class="article-preview-catalog-box">
-      <div class="article-preview-catalog">
-        <!-- ✅ scrollElement 绑定预览容器 -->
-        <MdCatalog
-            :editorId="id"
-            theme="light"
-            :mdHeadingId=mdHeadingId
-            :catalogMaxDepth="3"
-        />
-      </div>
-    </aside>
   </div>
 </template>
 
@@ -128,6 +138,10 @@ useArticle.fetchArticleInfo(route.query)
           display: flex;
           gap: 10px;
           justify-content: flex-end;
+
+          .flex1 {
+            flex: 1;
+          }
 
           a {
             transition: all .1s ease-in-out;
@@ -199,34 +213,22 @@ useArticle.fetchArticleInfo(route.query)
     }
 
     .article-body {
-      max-width: 1000px;
       height: calc(100vh - 185px);
       overflow-y: auto;          // ✅ 让它成为滚动容器
       scroll-behavior: smooth;   // ✅ 点击目录平滑滚动
       overflow-x: hidden;
-    }
-  }
 
-  .article-preview-catalog-box {
-    width: 300px;
-    position: sticky;
-    top: 0;
-    height: calc(100vh - 134px);
+      .md-editor {
+        height: 100%;
+        border: none;
 
-    .article-preview-catalog {
-      position: sticky;
-      top: 0;
-      background: #fff;
-      border-radius: 8px;
-      padding: 16px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-
-      .md-editor-catalog {
-        max-height: calc(100vh - 134px);
-        overflow-y: auto;
+        :deep(.md-editor-catalog-editor) {
+          width: 300px;
+        }
       }
     }
   }
+
 }
 
 /* 暗色模式支持 */

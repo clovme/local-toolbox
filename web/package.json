@@ -13,6 +13,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@lmstudio/sdk": "^1.5.0",
     "@vavt/v3-extension": "^3.0.0",
     "@vxe-ui/plugin-export-xlsx": "^4.0.7",
     "@vxe-ui/plugin-menu": "^4.0.2",

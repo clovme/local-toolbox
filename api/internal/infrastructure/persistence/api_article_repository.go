@@ -41,7 +41,7 @@ func (r *ApiArticleRepository) DeleteArticle(dto articleDTO.ApiArticleUpdateDTO)
 
 func (r *ApiArticleRepository) GetArticle(c *core.Context) (data *articleVO.ApiArticleVO, err error) {
 	a := r.Q.Article
-	err = a.Select(a.ID, a.Title, a.Tags, a.Summary, a.Content, a.CreatedAt, a.UpdatedAt, a.CategoryID, r.Q.Category.Title.As("category_title"), r.Q.Category.Name.As("category_name")).
+	err = a.Select(a.ID, a.Title, a.Tags, a.Summary, a.Content, a.CreatedAt, a.UpdatedAt, a.CategoryID, r.Q.Category.Title.As("category_title"), r.Q.Category.Name.As("category_name"), r.Q.Category.DocSort).
 		Where(a.ID.Eq(c.QueryInt64("id")), a.CategoryID.Eq(c.QueryInt64("cid")), r.Q.Category.Name.Eq(c.Query("type"))).LeftJoin(r.Q.Category, r.Q.Category.ID.EqCol(a.CategoryID)).Scan(&data)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (r *ApiArticleRepository) GetArticle(c *core.Context) (data *articleVO.ApiA
 func (r *ApiArticleRepository) GetArticleList(c *core.Context) (data []articleVO.ApiArticleVO, err error) {
 	a := r.Q.Article
 
-	w := a.Select(a.ID, a.Title, a.Tags, a.Summary, a.CreatedAt, a.UpdatedAt, a.CategoryID, r.Q.Category.Title.As("category_title"), r.Q.Category.Name.As("category_name"))
+	w := a.Select(a.ID, a.Title, a.Tags, a.Summary, a.CreatedAt, a.UpdatedAt, a.CategoryID, r.Q.Category.Title.As("category_title"), r.Q.Category.Name.As("category_name"), r.Q.Category.DocSort)
 	if c.Query("type") != "all" {
 		w = w.Where(a.CategoryID.Eq(c.QueryInt64("cid")), r.Q.Category.Name.Eq(c.Query("type")))
 	}

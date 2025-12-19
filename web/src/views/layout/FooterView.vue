@@ -12,7 +12,7 @@
     <span class="split">|</span>
     <span>编译时间: {{ copyright.buildTime }}</span>
     <span class="split">|</span>
-    <span>运行时间: {{ copyright.runtime }}</span>
+    <span>运行时间: {{ copyright.runtime.days }}天 {{ copyright.runtime.hours }}小时 {{ copyright.runtime.minutes }}分 {{ copyright.runtime.seconds }}秒</span>
   </div>
 </template>
 
@@ -30,28 +30,36 @@ const copyright = ref({
   goVersion: '1.0.0',
   pid: '0',
   buildTime: '2024-01-01 00:00:00',
-  runtime: '0天0小时0分0秒'
+  runtime: {
+    days: '00',
+    hours: '00',
+    minutes: '00',
+    seconds: '00'
+  }
 })
 
 getCopyright().then(res => {
   run = new Date(res.data.runTime).getTime()
   now = new Date(res.data.nowTime).getTime()
-  copyright.value = res.data
+  Object.assign(copyright.value, {
+    ...res.data,
+    runtime: copyright.value.runtime // 保留原 runtime
+  })
+  updateTimer() // 立即执行一次
 })
 
 function updateTimer () {
   const diff = now - run // 毫秒差
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24)
-  const minutes = Math.floor((diff / (1000 * 60)) % 60)
-  const seconds = Math.floor((diff / 1000) % 60)
-
-  copyright.value.runtime = `${days}天 ${hours}小时 ${minutes}分 ${seconds}秒`
-
+  copyright.value.runtime = copyright.value.runtime || {}
+  Object.assign(copyright.value.runtime, {
+    days: String(Math.floor(diff / (1000 * 60 * 60 * 24))).padStart(2, '0'),
+    hours: String(Math.floor((diff / (1000 * 60 * 60)) % 24)).padStart(2, '0'),
+    minutes: String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, '0'),
+    seconds: String(Math.floor((diff / 1000) % 60)).padStart(2, '0')
+  })
   // 秒数自动增加
   now += 1000
 }
-updateTimer() // 立即执行一次
 setInterval(updateTimer, 1000) // 每秒更新
 </script>
 

@@ -7,10 +7,11 @@ package database
 import (
 	"errors"
 	"fmt"
-	"toolbox/internal/bootstrap/database/initdata"
-	"toolbox/internal/core"
-	"toolbox/internal/models"
-	"toolbox/internal/infrastructure/query"
+	"gen_gin_tpl/internal/bootstrap/database/initdata"
+	"gen_gin_tpl/internal/core"
+	"gen_gin_tpl/internal/models/auth"
+	"gen_gin_tpl/internal/models"
+	"gen_gin_tpl/internal/infrastructure/query"
 	"gorm.io/gorm"
 	"reflect"
 	"strings"
@@ -61,11 +62,16 @@ func autoMigrateWithComments(db *gorm.DB, tables ...interface{}) error {
 //   - error: 迁移错误
 func AutoMigrate(db *gorm.DB, dbq *query.Query, router []core.RoutesInfo) error {
 	err := autoMigrateWithComments(db,
-		&models.Article{},
-		&models.Category{},
-		&models.DNSTable{},
-		&models.FileRecord{},
-		&models.Home{},
+		&auth.Permission{},
+		&auth.Role{},
+		&auth.RoleGroup{},
+		&auth.RolePermission{},
+		&auth.UserRole{},
+		&models.Config{},
+		&models.CorsWhitelist{},
+		&models.Enums{},
+		&models.Token{},
+		&models.User{},
 	)
 
 	if err != nil {

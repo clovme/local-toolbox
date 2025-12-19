@@ -5,46 +5,41 @@
 package routers
 
 import (
-	"toolbox/internal/bootstrap"
-	"toolbox/internal/core"
+	"gen_gin_tpl/internal/bootstrap"
+	"gen_gin_tpl/internal/core"
 	"gorm.io/gorm"
 )
 
 type routeGroup struct {
-	articleApi *core.RouterGroup
-	categoryApi *core.RouterGroup
-	dnsApi *core.RouterGroup
-	dnsView *core.RouterGroup
-	homeApi *core.RouterGroup
+	adminView *core.RouterGroup
+	auth *core.RouterGroup
+	authView *core.RouterGroup
+	noAuthView *core.RouterGroup
+	public *core.RouterGroup
+	publicView *core.RouterGroup
 }
 
 func (r *routeGroup) register(db *gorm.DB) {
 	// 初始化仓库和服务
 	ctx := bootstrap.NewAppContext(db)
 
-	r.articleApi.GET("/readme", ctx.ApiArticleHandler.ArticleHandler, "articleApi", "article", "获取Md说明文档")
-	r.articleApi.POST("/upload/images", ctx.ApiArticleHandler.PostUploadImagesHandler, "articleApi", "uploadImages", "图片上传")
-	r.articleApi.GET("/article/list", ctx.ApiArticleHandler.GetArticleListHandler, "articleApi", "articleListGet", "获取文章列表")
-	r.articleApi.GET("/article", ctx.ApiArticleHandler.GetArticleHandler, "articleApi", "articleGet", "获取文章列表")
-	r.articleApi.POST("/article", ctx.ApiArticleHandler.PostArticleHandler, "articleApi", "articleAdd", "添加文章")
-	r.articleApi.PUT("/article", ctx.ApiArticleHandler.PutArticleHandler, "articleApi", "articleUpdate", "添加文章")
-	r.articleApi.DELETE("/article", ctx.ApiArticleHandler.DeleteArticleHandler, "articleApi", "articleDelete", "添加文章")
+	r.adminView.GET("/admin.html", ctx.WebViewsHandler.GetViewsAdminHandler, "adminView", "adminIndexView", "系统管理首页")
 
-	r.categoryApi.GET("/category", ctx.ApiCategoryHandler.GetCategoryHandler, "categoryApi", "categoryGet", "获取分类数据")
-	r.categoryApi.DELETE("/category", ctx.ApiCategoryHandler.DeleteCategoryHandler, "categoryApi", "categoryDelete", "删除指定分类")
-	r.categoryApi.POST("/category", ctx.ApiCategoryHandler.PostCategoryHandler, "categoryApi", "categoryAdd", "新增分类")
-	r.categoryApi.PUT("/category", ctx.ApiCategoryHandler.PutCategoryHandler, "categoryApi", "categoryUpdate", "新增分类")
+	r.auth.POST("/logout", ctx.WebViewsHandler.GetViewsLogoutHandler, "auth", "logoutApi", "注销系统登录接口")
 
-	r.dnsApi.GET("/enums", ctx.WebDnsHandler.GetEnumsHandler, "dnsApi", "enumsMap", "获取枚举映射")
-	r.dnsApi.GET("/copyright", ctx.WebDnsHandler.CopyrightHandler, "dnsApi", "copyright", "版权")
-	r.dnsApi.GET("/list", ctx.WebDnsHandler.PageHandler, "dnsApi", "dnsList", "获取DNS列表")
-	r.dnsApi.POST("/save", ctx.WebDnsHandler.SaveHandler, "dnsApi", "dnsSave", "保存DNS数据")
-	r.dnsApi.DELETE("/delete", ctx.WebDnsHandler.DeleteHandler, "dnsApi", "dnsDelete", "删除DNS数据")
-	r.dnsApi.POST("/service/running/:iface", ctx.WebDnsHandler.ServiceRunningHandler, "dnsApi", "dnsServiceRunning", "启动DNS服务")
-	r.dnsApi.POST("/service/stop/:iface", ctx.WebDnsHandler.ServiceStopHandler, "dnsApi", "dnsServiceStop", "禁用DNS服务")
-	r.dnsApi.GET("/network/interfaces", ctx.WebDnsHandler.GetNetIfaceHandler, "dnsApi", "dnsNetIface", "获取网络接口列表")
+	r.authView.GET("/me.html", ctx.WebViewsHandler.GetViewsMeHandler, "authView", "meIndexView", "个人中心")
 
-	r.dnsView.GET("/", ctx.WebDnsHandler.GetViewsIndexHandler, "dnsView", "indexView", "首页视图")
+	r.noAuthView.GET("/login.html", ctx.WebViewsHandler.GetViewsLoginHandler, "noAuthView", "loginView", "登录")
+	r.noAuthView.GET("/regedit.html", ctx.WebViewsHandler.GetViewsRegeditHandler, "noAuthView", "regeditView", "注册")
+	r.noAuthView.POST("/login.html", ctx.WebViewsHandler.PostViewsLoginHandler, "noAuthView", "loginApi", "用户登录处理接口")
+	r.noAuthView.POST("/regedit.html", ctx.WebViewsHandler.PostViewsRegeditHandler, "noAuthView", "regeditApi", "用户注册处理接口")
 
-	r.homeApi.GET("/home/data", ctx.ApiHomeHandler.HomeDataHandler, "homeApi", "homeGet", "获取首页数据")
+	r.public.GET("/public/key", ctx.ApiPublicHandler.GetPublicKey, "public", "publicKey", "公钥")
+	r.public.GET("/public/enums", ctx.ApiPublicHandler.GetEnumList, "public", "enumListApi", "枚举列表")
+	r.public.GET("/public/ping", ctx.ApiPublicHandler.GetPing, "public", "pingApi", "心跳检测")
+	r.public.GET("/public/time", ctx.ApiPublicHandler.GetServerTime, "public", "serverTimeApi", "服务器时间")
+	r.public.POST("/public/email/code", ctx.ApiPublicHandler.PostSendEmailCaptcha, "public", "emailCodeApi", "发送邮箱验证码")
+
+	r.publicView.GET("/", ctx.WebViewsHandler.GetViewsIndexHandler, "publicView", "indexView", "首页")
+	r.publicView.GET("/public/captcha.png", ctx.WebViewsHandler.GetImagesCaptcha, "publicView", "captchaApi", "生成图形验证码")
 }
